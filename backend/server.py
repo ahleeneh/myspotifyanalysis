@@ -3,7 +3,7 @@ import requests
 import urllib.parse
 from flask import Flask, redirect, request, jsonify, session, make_response
 from dotenv import load_dotenv
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import secrets
 from flask_cors import CORS
 
@@ -133,18 +133,27 @@ def user_playlists():
         'Authorization': f"Bearer {session['access_token']}"
     }
 
+    # Send GET request to retrieve user's id
+    user_id = get_user_id(headers)['id']
+
     # Send GET request to retrieve all of user's playlists
     limit = 50
     offset = 0
     url = f"{API_BASE_URL}me/playlists?limit={limit}&offset={offset}"
     response = requests.get(url, headers=headers)
 
-    print('Response after sending get requests to get all playlists: ', response)
     if response:
         playlists = response.json()
-        return playlists['items']
+        playlists_by_user = get_playlists_by_user(user_id, playlists['items'])
+
+        playlists_by_user_cur_yr = get_current_year_playlists(playlists_by_user, headers)
+        print('PLAYLISTS BY USER CURRENT YEAR: ', playlists_by_user_cur_yr)
+
+        return playlists_by_user_cur_yr
     else:
         return 'Error retrieving all playlists!'
+
+
 
 
 # -----------------------------
@@ -156,6 +165,64 @@ def logout():
     response = make_response('Logged out!')
     response.delete_cookie('MY SPOTIFY ANALYSIS COOKIE COOKIE!')
     return response
+
+
+# -----------------------------
+# Get User's Id Function
+# -----------------------------
+def get_user_id(headers):
+    url = f"{API_BASE_URL}me"
+    response = requests.get(url, headers=headers)
+    return response.json()
+
+
+# -----------------------------
+# Get Playlists Created by User
+#                      Function
+# -----------------------------
+def get_playlists_by_user(user_id, playlists):
+    playlists_by_user = []
+
+    for playlist in playlists:
+        if playlist['owner']['id'] == user_id:
+            playlists_by_user.append(playlist)
+
+    return playlists_by_user
+
+
+# -----------------------------
+# Get Playlists Created by User
+#            This Year Function
+# -----------------------------
+def get_current_year_playlists(playlists, headers):
+    playlists_by_current_year = []
+    current_date = date.today()
+    current_year = current_date.year
+    
+    for playlist in playlists:
+        url = f"{playlist['href']}/tracks?market=US&limit=1"
+        response = requests.get(url, headers=headers)
+        playlist_info = response.json()
+        created_year = get_playlist_created_year(playlist_info['items'])
+
+        if created_year == current_year:
+            playlists_by_current_year.append(playlist)
+        
+    print(playlists_by_current_year)
+    return playlists_by_current_year
+
+
+def get_playlist_created_year(playlists):
+    for playlist in playlists:
+        if playlist['added_at']:
+            created_year = int(playlist['added_at'][:4])
+            return created_year
+        else:
+            return None
+
+
+
+
 
 
 # -----------------------------
@@ -198,4 +265,3 @@ def clear_session():
 
 if __name__ == '__main__':
     app.run(port=6393, debug=True)
-
