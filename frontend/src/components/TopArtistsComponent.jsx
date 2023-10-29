@@ -1,13 +1,12 @@
 import React from 'react';
 
-function TopArtistsComponent () {
+function TopArtistsComponent() {
     return (
-        <>
+        <div className="main-content-container">
             <h1>top artists</h1>
-            <div className="main-content-container">
-                <p>coming soon...</p>
-            </div>
-        </>
+
+            <p>coming soon...</p>
+        </div>
     )
 }
 
