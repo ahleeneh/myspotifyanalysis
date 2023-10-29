@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import empty from '../images/empty.png';
 
 function PlaylistsComponent() {
     const navigate = useNavigate();
@@ -47,8 +48,13 @@ function PlaylistsComponent() {
 
                         {playlists.map((playlist) => (
                             <div className="card" key={playlist.id}>
-                                <img src={playlist.images[0].url} className="card-image" />
+                                {playlist.images && playlist.images.length > 0 && playlist.images[0].url ? (
+                                    <img src={playlist.images[0].url} className="card-image" />
+                                ) : (
+                                    <img src={empty} className="card-image" />
+                                )}
                                 <h2>{truncateText(playlist.name, 19)}</h2>
+
                                 <p>{truncateText(playlist.description, 35)}</p>
                             </div>
                         ))}

@@ -1,7 +1,7 @@
 :root {
     --color-white: #fff;
     --color-black: #000;
-    --color-dark-grey: #191919;
+    --color-dark-grey: #141414;
     --color-light-grey: #adadad;
     --color-light-grey-hover: #696969;
     --color-medium-grey: #d5d5d5;
@@ -16,6 +16,8 @@
     --border-radius-button: 5rem;
     --border-radius-card: 0.6rem;
     --border-radius-image: 0.3rem;
+
+    --button-hover: #494eab;
 
     line-height: 1.5;
     font-weight: 400;
@@ -37,13 +39,23 @@
 
 html {
     min-height: 100vh;
-    background-color: var(--color-spotify-black);
+    background-color: var(--color-black);
+}
+
+main {
+    min-height: 100vh;
+}
+
+.login-page {
+    background-color: var(--color-dark-grey);
+    min-height: 100vh;
+    padding: 1rem;
 }
 
 .login-page-container {
-    margin: 3rem auto;
     max-width: 1280px;
-    padding: 1rem;
+    margin: auto;
+    box-sizing: border-box;
 }
 
 .content-container {
@@ -114,7 +126,7 @@ button {
 }
 
 button:hover {
-    border-color: #646cff;
+    border-color: var(--button-hover);
 }
 
 button:focus,
@@ -128,6 +140,7 @@ button:focus-visible {
     justify-content: center;
     gap: 1.5rem;
     flex-wrap: wrap;
+    padding: 1rem 0 2rem 0;
 }
 
 .feature-card {

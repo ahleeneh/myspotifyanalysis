@@ -3,7 +3,11 @@ import React from 'react';
 function TopTracksComponent() {
     return (
         <>
-            <p>Top Tracks Here</p>
+            <h1>top tracks</h1>
+
+            <div className="main-content-container">
+                <p>coming soon...</p>
+            </div>
         </>
     )
 }

@@ -7,6 +7,7 @@ import SidebarLinksComponent from '../../components/SidebarLinksComponent';
 import PlaylistsComponent from '../../components/PlaylistsComponent';
 import TopArtistsComponent from '../../components/TopArtistsComponent';
 import TopTracksComponent from '../../components/TopTracksComponent';
+import RecommendedComponent from '../../components/RecommendedComponent';
 
 function userPage() {
     const navigate = useNavigate();
@@ -40,6 +41,8 @@ function renderMainComponent(selectedLink) {
             return <TopTracksComponent />;
         case 'top-artists':
             return <TopArtistsComponent />;
+        case 'recommended':
+            return <RecommendedComponent />;
         default:
             return <PlaylistsComponent />;
     }

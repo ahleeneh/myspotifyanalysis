@@ -13,7 +13,9 @@ function LoginPage() {
 
     const handleSpotifyLogin = async () => {
         try {
-            const response = await axios.get('http://localhost:6393/authorize');
+            const response = await axios.get('http://localhost:6393/authorize', {
+                withCredentials: true
+            });
 
             const authorizationUrl = response.data;
             console.log(authorizationUrl);
@@ -26,40 +28,42 @@ function LoginPage() {
 
 
     return (
-        <div className="login-page-container">
-            <h1>my Spotify analysis</h1>
+        <div className="login-page">
+            <div className="login-page-container">
+                <h1>my Spotify analysis</h1>
 
-            <p>Log in with your Spotify account to see your custom music analysis.</p>
+                <p>Log in with your Spotify account to see your custom music analysis.</p>
 
-            <button id="button-spotify-login" onClick={handleSpotifyLogin}>
-                <img src={spotifyLogo} alt="Spotify Logo" id="spotify-icon" />
-                <p>Log in with Spotify</p>
-            </button>
+                <button id="button-spotify-login" onClick={handleSpotifyLogin}>
+                    <img src={spotifyLogo} alt="Spotify Logo" id="spotify-icon" />
+                    <p>Log in with Spotify</p>
+                </button>
 
-            <div className="features-container">
-                <div className="feature-card">
-                    <img src={flower} className="card-image" />
-                    <h2>playlists '23</h2>
-                    <p>explore your annual playlists</p>
+                <div className="features-container">
+                    <div className="feature-card">
+                        <img src={flower} className="card-image" />
+                        <h2>playlists '23</h2>
+                        <p>explore your annual playlists</p>
+                    </div>
+
+                    <div className="feature-card">
+                        <img src={dawn} className="card-image" />
+                        <h2>top tracks</h2>
+                        <p>top songs: 4 weeks, 6 months, all-time</p>
+                    </div>
+
+                    <div className="feature-card">
+                        <img src={cliff} className="card-image" />
+                        <h2>top artists</h2>
+                        <p>top artists: 4 weeks, 6 months, all-time</p>
+                    </div>
+
+                    <div className="feature-card">
+                        <img src={sea} className="card-image" />
+                        <h2>recommended</h2>
+                        <p>view artists, songs, and genres for you</p>
+                    </div>
                 </div>
-
-                <div className="feature-card">
-                    <img src={dawn} className="card-image" />
-                    <h2>top tracks</h2>
-                    <p>top songs: 4 weeks, 6 months, all-time</p>
-                </div>
-
-                <div className="feature-card">
-                    <img src={cliff} className="card-image" />
-                    <h2>top artists</h2>
-                    <p>top artists: 4 weeks, 6 months, all-time</p>
-                </div>
-
-                {/* <div className="feature-card">
-                    <img src={sea} className="card-image" />
-                    <h2>recommended</h2>
-                    <p>view artists, songs, and genres for you</p>
-                </div> */}
             </div>
 
         </div>

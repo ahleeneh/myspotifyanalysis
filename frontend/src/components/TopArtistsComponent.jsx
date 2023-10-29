@@ -3,7 +3,11 @@ import React from 'react';
 function TopArtistsComponent () {
     return (
         <>
-            <p>Top Artists Here</p>
+            <h1>top artists</h1>
+
+            <div className="main-content-container">
+                <p>coming soon...</p>
+            </div>
         </>
     )
 }
