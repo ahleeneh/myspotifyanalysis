@@ -1,0 +1,49 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyChainedComparisonsInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoreConstantInTheMiddle" value="true" />
+    </inspection_tool>
+    <inspection_tool class="PyPep8Inspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="W191" />
+          <option value="E501" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyPep8NamingInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="N802" />
+          <option value="N801" />
+          <option value="N803" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="current_day" />
+          <option value="menu_dict" />
+          <option value="sales_record" />
+          <option value="object.get_name" />
+          <option value="checked_out_by" />
+          <option value="location" />
+          <option value="requested_by" />
+          <option value="date_checked_out" />
+          <option value="check_out_length" />
+          <option value="fine_amount" />
+          <option value="checked_out_items" />
+          <option value="object.get_library_item_id" />
+          <option value="current_date" />
+          <option value="holdings" />
+          <option value="members" />
+          <option value="object.get_patron_id" />
+          <option value="object.next" />
+          <option value="object.data" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>

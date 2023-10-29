@@ -1,0 +1,164 @@
+:root {
+    --color-white: #fff;
+    --color-black: #000;
+    --color-light-grey: #adadad;
+    --color-light-grey-hover: #696969;
+    --color-medium-grey: #d5d5d5;
+
+    --color-card: #1d1d1d;
+    --color-card-hover: #2c2c2c;
+
+    --color-spotify-black: #191414;
+    --color-spotify-green: #1DB954;
+    --color-spotify-white: #ffffff;
+
+    --border-radius-button: 5rem;
+    --border-radius-card: 0.6rem;
+    --border-radius-image: 0.3rem;
+
+    line-height: 1.5;
+    font-weight: 400;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Varela Round', sans-serif;
+}
+
+
+html {
+    min-height: 100vh;
+    background-color: var(--color-spotify-black);
+}
+
+.login-page-container {
+    margin: 3rem auto;
+    max-width: 1280px;
+    padding: 1rem;
+}
+
+.content-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+body {
+    text-align: center;
+    color: var(--color-white);
+}
+
+a {
+    font-weight: 500;
+    color: var(--color-light-grey);
+    text-decoration: inherit;
+}
+
+a:hover {
+    color: var(--color-light-grey-hover);
+}
+
+
+h1 {
+    margin: 2rem;
+    font-size: 2.2em;
+    line-height: 1.1;
+    color: var(--color-white);
+}
+
+h2 {
+    margin: 0;
+}
+
+p {
+    margin: 0;
+}
+
+#small-font-size {
+    font-size: 0.rem;
+}
+
+#button-spotify-login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 3rem;
+    margin: 2rem auto;
+    width: 18rem;
+    gap: 14px;
+    color: var(--color-spotify-white);
+    background-color: var(--color-spotify-green);
+}
+
+button {
+    border-radius: var(--border-radius-button);
+    border: 1px solid transparent;
+    padding: 1.5rem 2rem;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.25s;
+}
+
+#spotify-icon {
+    max-height: 28px;
+}
+
+button:hover {
+    border-color: #646cff;
+}
+
+button:focus,
+button:focus-visible {
+    outline: 4px auto -webkit-focus-ring-color;
+}
+
+.features-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.feature-card {
+    background-color: var(--color-card);
+    padding: 15px;
+    width: 11.5rem;
+    height: 16.483rem;
+    box-sizing: border-box;
+    border-radius: var(--border-radius-card);
+    transition: background-color 0.25s;
+    box-sizing: border-box;
+    display: flex;
+    align-items: left;
+    flex-direction: column;
+    text-align: left;
+}
+
+.feature-card:hover {
+    background-color: var(--color-card-hover);
+}
+
+.feature-card h2 {
+    font-size: 1.1rem;
+}
+
+.feature-card p {
+    font-size: 0.85rem;
+    color: var(--color-light-grey);
+}
+
+.card-image {
+    max-width: 100%;
+    border-radius: var(--border-radius-image);
+    margin-bottom: 0.7rem;
+}
