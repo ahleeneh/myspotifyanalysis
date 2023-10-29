@@ -1,7 +1,25 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import empty from '../images/empty.png';
 
 function PlaylistsComponent({ playlists, isLoading }) {
+    const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+
+    const getPlaylistDetails = async (playlistId) => {
+        try {
+            const response = await axios.get(`http://localhost:6393/playlist-tracks?playlistId=${playlistId}`, {
+                withCredentials: true
+            });
+
+            const playlistTracks = response.data;
+
+            console.log(playlistTracks)
+
+        } catch (error) {
+            console.error('Error: ', error)
+        }
+    }
+
     const truncateText = (description, limit) => {
         if (description.length > limit) {
             return description.substring(0, limit) + '...';
@@ -20,7 +38,11 @@ function PlaylistsComponent({ playlists, isLoading }) {
                     playlists && playlists.length > 0) ? (
                     <div className="cards-container">
                         {playlists.map((playlist) => (
-                            <div className="card" key={playlist.id}>
+                            <div
+                                className="card"
+                                key={playlist.id}
+                                onClick={() => getPlaylistDetails(playlist.id)}
+                            >
                                 {playlist.images && playlist.images.length > 0 && playlist.images[0].url ? (
                                     <img src={playlist.images[0].url} className="card-image" />
                                 ) : (

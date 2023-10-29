@@ -109,7 +109,8 @@ def callback():
         # Save the token information in the session
         session['access_token'] = token_info['access_token']
         session['refresh_token'] = token_info['refresh_token']
-        session['expires_at'] = datetime.now().timestamp() + token_info['expires_in']
+        session['expires_at'] = datetime.now().timestamp() + \
+                                             token_info['expires_in']
 
         # Redirect the user to the frontend user page
         return redirect(FRONTEND_REDIRECT_URL)
@@ -142,8 +143,9 @@ def user_playlists():
     playlists = response.json()
 
     # Find the playlists created by the current user this year
-    annual_user_playlists = get_annual_user_playlists(user_id, headers, playlists['items'])
-        
+    annual_user_playlists = get_annual_user_playlists(
+        user_id, headers, playlists['items'])
+
     if annual_user_playlists:
         return annual_user_playlists
     else:
@@ -163,8 +165,9 @@ def get_annual_user_playlists(user_id, headers, playlists):
         created_year = get_year_playlist_created(headers, playlist)
         if created_year == current_year:
             annual_user_playlists.append(playlist)
-    
+
     return annual_user_playlists
+
 
 def get_year_playlist_created(headers, playlist):
     current_year = date.today().year
@@ -179,6 +182,36 @@ def get_year_playlist_created(headers, playlist):
             return None
 
     return current_year
+
+
+# -----------------------------
+# Get Playlist Details Route
+# -----------------------------
+@app.route('/playlist-tracks')
+def playlist_tracks():
+    if 'access_token' not in session:
+        print('Session expired!')
+        return redirect(FRONTEND_LOGIN_URL)
+    
+    # Retrieve new refresh token if access token expired
+    if datetime.now().timestamp() > session['expires_at']:
+        refresh_access_token()
+
+    # Retrieve the playlist Id from the query parameters
+    playlist_id = request.args.get('playlistId')
+
+    # Create header to use Spotify Web API
+    headers = {
+        'Authorization': f"Bearer {session['access_token']}"
+    }
+
+    # Send GET request to retrieve a playlist's tracks
+    url = f"{API_BASE_URL}playlists/{playlist_id}/tracks" 
+    response = requests.get(url, headers=headers)
+    playlist_tracks = response.json()
+
+    print(playlist_tracks['items'])
+    return playlist_tracks['items']
 
 
 # -----------------------------
