@@ -14,13 +14,13 @@ import useUserData from '../../hooks/useUserData';
 function userPage() {
     const navigate = useNavigate();
     const [selectedLink, setSelectedLink] = useState('user-playlists');
-    const { playlists, topTracks, topArtists, isLoading } = useUserData();
+    const { playlists, topTracks, topArtists, displayName, isLoading } = useUserData();
 
     return (
         <div className="user-page">
             <div className="sidebar-column">
                 <div className="sidebar-home">
-                    <SidebarHomeComponent />
+                    <SidebarHomeComponent displayName={displayName}/>
                 </div>
                 <div className="sidebar-links">
                     <SidebarLinksComponent onSelectLink={setSelectedLink} selectedLink={selectedLink} />

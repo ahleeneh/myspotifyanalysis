@@ -38,6 +38,10 @@ main {
     padding: 0.75rem;
 }
 
+.sidebar-home p {
+    padding: 0 0.75rem;
+}
+
 .sidebar-links h3 {
     font-size: 1.1rem;
 }

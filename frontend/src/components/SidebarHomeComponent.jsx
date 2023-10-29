@@ -1,9 +1,10 @@
 import React from 'react';
 
-function SidebarHomeComponent() {
+function SidebarHomeComponent({ displayName }) {
     return (
         <>
             <h2>my Spotify analysis</h2>
+            <p>🎧 {displayName}</p>
         </>
     )
 }

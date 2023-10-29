@@ -215,6 +215,32 @@ def playlist_tracks():
 
 
 # -----------------------------
+# Get User Display Name Route
+# -----------------------------
+@app.route('/user-display-name')
+def user_display_name():
+    if 'access_token' not in session:
+        print('Session expired!')
+        return redirect(FRONTEND_LOGIN_URL)
+    
+    # Retrieve new refresh token if access token expired
+    if datetime.now().timestamp() > session['expires_at']:
+        refresh_access_token()
+
+    # Create header to use Spotify Web API
+    headers = {
+        'Authorization': f"Bearer {session['access_token']}"
+    }
+
+    # Send GET request to retrieve a playlist's tracks
+    url = f"{API_BASE_URL}me" 
+    response = requests.get(url, headers=headers)
+    user_info = response.json()
+
+    print(user_info['display_name'])
+    return user_info['display_name']
+
+# -----------------------------
 # Logout Route
 # -----------------------------
 @app.route('/logout')
