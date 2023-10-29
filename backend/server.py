@@ -1,6 +1,6 @@
 import os
 import time
-import logging
+import secrets
 from datetime import timedelta
 
 import spotipy
@@ -25,6 +25,7 @@ app = Flask(__name__)
 CORS(app, supports_credentials=True, origins=['http://localhost:1890'])
 
 # Set the name of the session cookie
+app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_COOKIE_NAME'] = 'My Spotify Analysis Cookie'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)
 
@@ -50,8 +51,19 @@ def home():
 # -----------------------------
 @app.route('/authorize')
 def authorize():
+    # Generate a random state value
+    state = secrets.token_urlsafe(16)
+    print('newly generated state: ', state)
+
+    print('session before stated added: ', session)
+    session['oauth_state'] = state
+    print('session after state added: ', session)
+
     # Create a SpotifyOAuth instance and get the authorization URL
-    auth_url = create_spotify_oauth().get_authorize_url()
+    auth_url = create_spotify_oauth().get_authorize_url(state=state)
+
+    print('new authorization url: ', auth_url)
+    print('session after getting auth url: ', session)
 
     # Return the authorization url
     return auth_url
@@ -62,14 +74,22 @@ def authorize():
 # -----------------------------
 @app.route('/redirect-page')
 def redirect_page():
+    print('')
+    print('redirect page function entered:')
+    print(request.args)
+    print('')
+    print('session: ', session)
+
     # Clear the session
     session.clear()
 
     # Get the authorization code from the request parameters
     code = request.args.get('code')
+    print('authorization code: ', code)
 
     # Exchange the authorization code for an access/refresh token
     token_info = create_spotify_oauth().get_access_token(code)
+    print('here is the token info from the redirect page....', token_info)
 
     # Save the token info in the session
     session[TOKEN_INFO] = token_info
@@ -85,20 +105,32 @@ def redirect_page():
 # -----------------------------
 @app.route('/user-playlists')
 def user_playlists():
-    try:
-        # Get the token info from the session
-        token_info = get_token()
+    token_info = session.get(TOKEN_INFO)
+    print(f"Here is the token info: {token_info}")
 
-        # Create a Spotipy instance with the access token
+    if token_info:
         sp = spotipy.Spotify(auth=token_info['access_token'])
-
-        # Get the user's playlists
         playlists = sp.current_user_playlists()['items']
-
         return playlists
-    except Exception as e:
-        error_message = f"An error occurred: {str(e)}"
-        abort(401, description=error_message)
+
+    else:
+        print("USER IS NOT LOGGED IN!!!!")
+        abort(401, description="An error occurred")
+
+    # try:
+    #     # Get the token info from the session
+    #     token_info = get_token()
+
+    #     # Create a Spotipy instance with the access token
+    #     sp = spotipy.Spotify(auth=token_info['access_token'])
+
+    #     # Get the user's playlists
+    #     playlists = sp.current_user_playlists()['items']
+
+    #     return playlists
+    # except Exception as e:
+    #     error_message = f"An error occurred: {str(e)}"
+    #     abort(401, description=error_message)
 
 
 # -----------------------------
@@ -106,25 +138,23 @@ def user_playlists():
 # -----------------------------
 @app.route('/logout')
 def logout():
-    try:
-        # Clear the token info from the session
-        session.pop(TOKEN_INFO, None)
+    # Clear the token info from the session
+    session.pop(TOKEN_INFO, None)
 
-        # Clear the session data
-        session.clear()
+    # Clear the session data
+    session.clear()
 
-        # Clear client-side cookies
-        response = make_response('Logged out successfully')
-        print('response is: ', response)
-        response.delete_cookie('My Spotify Analysis Cookie')  # Replace with the actual cookie name
+    # Clear client-side cookies
+    response = make_response('Logged out successfully')
+    print('response is: ', response)
+    # Replace with the actual cookie name
+    response.delete_cookie('My Spotify Analysis Cookie')
 
-        print('deleted cookie...')
+    print('deleted cookie...')
+    token_info = session.get(TOKEN_INFO)
+    print(f"Here is the token info: {token_info}")
 
-        return response
-    except Exception as e:
-        logging.error(f"Error during logout: {str(e)}")
-
-        return 'An error occurred during log out', 500
+    return response
 
 
 # -----------------------------
@@ -145,10 +175,10 @@ def get_token():
     is_expired = token_info['expires_at'] - now < 60
     if is_expired:
         spotify_oauth = create_spotify_oauth()
-        token_info = spotify_oauth.refresh_access_token(token_info['refresh_token'])
+        token_info = spotify_oauth.refresh_access_token(
+            token_info['refresh_token'])
 
     return token_info
-
 
 
 def create_spotify_oauth():
@@ -158,7 +188,8 @@ def create_spotify_oauth():
         client_secret=client_secret,
         redirect_uri=url_for('redirect_page', _external=True),
         scope=scope
-        )
+    )
+
 
 
 if __name__ == '__main__':

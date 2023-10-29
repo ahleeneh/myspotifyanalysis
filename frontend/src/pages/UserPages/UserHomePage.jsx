@@ -4,7 +4,6 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 
-
 function userHomePage() {
     const navigate = useNavigate();
     const [playlists, setPlaylists] = useState([]);
