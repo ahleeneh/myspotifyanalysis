@@ -2,13 +2,17 @@
     display: flex;
     box-sizing: border-box;
     text-align: left;
+    max-height: 100vh;
 }
 
 .sidebar-column {
     width: 20rem;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    /* min-height: 100vh; */
+    /* position: fixed; */
+    /* top: 0;
+    bottom: 0; */
 }
 
 .sidebar-home {
@@ -24,6 +28,7 @@
     background-color: var(--color-dark-grey);
     border-radius: var(--border-radius-card);
     flex: 1;
+    overflow-y: auto;
 }
 
 .sidebar-home h2, .sidebar-links h2 {
@@ -33,7 +38,6 @@
 .sidebar-links h3 {
     font-size: 1.1rem;
 }
-
 
 
 .link-card {
@@ -81,7 +85,9 @@
     background-color: var(--color-dark-grey);
     border-radius: var(--border-radius-card);
     padding: 20px;
+    overflow: scroll;
     margin: 0.5rem 0.5rem 0.5rem 0.25rem;
+    max-height: calc(100vh - 1rem);
 }
 
 .main-column h1 {
@@ -90,6 +96,7 @@
 
 .main-content-container {
     padding: 1rem 0 0 0;
+    overflow-y: auto;
 }
 
 .cards-container {
@@ -136,4 +143,16 @@
     object-fit: cover; /* Maintain aspect ratio and cover the entire container */
     border-radius: var(--border-radius-image);
     margin-bottom: 0.7rem;
+}
+
+#button-logout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-white);
+    padding: 1.2rem;
+    width: 100%;
+    background-color: var(--color-spotify-green);
+    height: 1rem;
+    text-align: center;
 }

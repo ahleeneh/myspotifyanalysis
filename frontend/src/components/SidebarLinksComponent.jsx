@@ -1,12 +1,31 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import flower from '../images/flower.png';
 import cliff from '../images/cliff.png';
 import dawn from '../images/dawn.png';
-import sea from '../images/sea.png';
 import axios from 'axios';
 
 
 function SidebarLinksComponent({ onSelectLink, selectedLink }) {
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        try {
+            const response = await axios.get('http://localhost:6393/logout', {
+                withCredentials: true
+            })
+
+            console.log('return from response!!!')
+            console.log(response.data);
+
+            deleteCookie('My Spotify Analysis Cookie')
+            console.log('deleted cookie?');
+
+            navigate('/');
+        } catch (error) {
+            console.error('Error: ', error)
+        }
+    }
 
     return (
         <>
@@ -36,6 +55,9 @@ function SidebarLinksComponent({ onSelectLink, selectedLink }) {
                 </div>
             </div>
 
+            <div className="link-logout">
+                <button onClick={handleLogout} id="button-logout">Logout</button>
+            </div>
 
         </>
     )
