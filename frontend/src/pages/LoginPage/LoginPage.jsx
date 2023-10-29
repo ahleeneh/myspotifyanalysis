@@ -1,7 +1,6 @@
 import './LoginPage.css';
 import React from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import spotifyLogo from '../../assets/spotify/Spotify_Icon_RGB_White.png';
 import flower from '../../images/flower.png';
 import cliff from '../../images/cliff.png';
@@ -9,8 +8,6 @@ import dawn from '../../images/dawn.png';
 import sea from '../../images/sea.png';
 
 function LoginPage() {
-    const navigate = useNavigate();
-
     const handleSpotifyLogin = async () => {
         try {
             const response = await axios.get('http://localhost:6393/authorize', {
@@ -68,6 +65,7 @@ function LoginPage() {
 
         </div>
     );
+    
 }
 
 export default LoginPage;

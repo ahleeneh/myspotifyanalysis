@@ -6,7 +6,6 @@ import dawn from '../images/dawn.png';
 import sea from '../images/sea.png';
 import axios from 'axios';
 
-
 function SidebarLinksComponent({ onSelectLink, selectedLink }) {
     const navigate = useNavigate();
 
@@ -62,13 +61,14 @@ function SidebarLinksComponent({ onSelectLink, selectedLink }) {
                 </div>
 
             </div>
-            
+
             <div className="link-bottom">
                 <button onClick={handleLogout} id="button-logout">Logout</button>
             </div>
 
         </>
-    )
+    );
+
 }
 
 export default SidebarLinksComponent;

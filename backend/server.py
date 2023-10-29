@@ -1,10 +1,10 @@
 import os
 import requests
+import secrets
 import urllib.parse
-from flask import Flask, redirect, request, jsonify, session, make_response
 from dotenv import load_dotenv
 from datetime import datetime, timedelta, date
-import secrets
+from flask import Flask, redirect, request, jsonify, session, make_response
 from flask_cors import CORS
 
 # Load environment variables from the .env file
@@ -34,7 +34,7 @@ CORS(app, supports_credentials=True)
 # Configure session key
 app.secret_key = SECRET_KEY
 app.config['SESSION_COOKIE_NAME'] = 'MY SPOTIFY ANALYSIS COOKIE COOKIE!'
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=2)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 
 
 # -----------------------------
@@ -136,20 +136,18 @@ def user_playlists():
     # Send GET request to retrieve user's id
     user_id = get_user_id(headers)['id']
 
-    # Send GET request to retrieve up to 50 of user's playlists
-    url = f"{API_BASE_URL}me/playlists?limit=50&offset=0"
+    # Send GET request to retrieve up to 20 of user's playlists
+    url = f"{API_BASE_URL}me/playlists"
     response = requests.get(url, headers=headers)
+    playlists = response.json()
 
-    if response:
-        playlists = response.json()
-        annual_user_playlists = get_annual_user_playlists(user_id, headers, playlists['items'])
+    # Find the playlists created by the current user this year
+    annual_user_playlists = get_annual_user_playlists(user_id, headers, playlists['items'])
         
-        if annual_user_playlists:
-            return annual_user_playlists
-        else:
-            return 'No playlists found for this year for current user.'
+    if annual_user_playlists:
+        return annual_user_playlists
     else:
-        return 'Error retrieving all playlists!'
+        return 'No playlists found for this year for current user.'
 
 
 def get_annual_user_playlists(user_id, headers, playlists):
@@ -195,18 +193,21 @@ def logout():
 
 
 # -----------------------------
-# Get User's Id Function
+# Additional Functions
 # -----------------------------
 def get_user_id(headers):
+    '''
+    Retrieve a user's id.
+    '''
     url = f"{API_BASE_URL}me"
     response = requests.get(url, headers=headers)
     return response.json()
 
 
-# -----------------------------
-# Refresh Token Function
-# -----------------------------
 def refresh_access_token():
+    '''
+    Exchange a refresh token, if valid, for a new access token.
+    '''
     print('Refreshing token!')
     if 'refresh_token' in session and datetime.now().timestamp() > session['expires_at']:
         req_body = {
@@ -227,10 +228,11 @@ def refresh_access_token():
     else:
         return redirect(FRONTEND_LOGIN_URL)
 
-# -----------------------------
-# Clear Session Function
-# -----------------------------
+
 def clear_session():
+    '''
+    Clear a user's session.
+    '''
     if 'access_token' in session:
         session.pop('access_token')
     if 'refresh_token' in session:
@@ -241,5 +243,8 @@ def clear_session():
         session.pop('state')
 
 
+# -----------------------------
+# Start Flask Application
+# -----------------------------
 if __name__ == '__main__':
     app.run(port=6393, debug=True)

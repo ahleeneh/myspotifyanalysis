@@ -9,9 +9,12 @@ import TopArtistsComponent from '../../components/TopArtistsComponent';
 import TopTracksComponent from '../../components/TopTracksComponent';
 import RecommendedComponent from '../../components/RecommendedComponent';
 
+import useUserData from '../../hooks/useUserData';
+
 function userPage() {
     const navigate = useNavigate();
     const [selectedLink, setSelectedLink] = useState('user-playlists');
+    const { playlists, topTracks, topArtists, isLoading } = useUserData();
 
     return (
         <div className="user-page">
@@ -26,17 +29,17 @@ function userPage() {
             </div>
 
             <div className="main-column">
-                {renderMainComponent(selectedLink)}
+                {renderMainComponent(selectedLink, playlists, isLoading)}
             </div>
 
         </div>
     );
 }
 
-function renderMainComponent(selectedLink) {
+function renderMainComponent(selectedLink, playlists, isLoading) {
     switch (selectedLink) {
         case 'user-playlists':
-            return <PlaylistsComponent />;
+            return <PlaylistsComponent playlists={playlists} isLoading={isLoading} />;
         case 'top-tracks':
             return <TopTracksComponent />;
         case 'top-artists':
@@ -44,7 +47,7 @@ function renderMainComponent(selectedLink) {
         case 'recommended':
             return <RecommendedComponent />;
         default:
-            return <PlaylistsComponent />;
+            return <PlaylistsComponent playlists={playlists} isLoading={isLoading} />;
     }
 }
 
