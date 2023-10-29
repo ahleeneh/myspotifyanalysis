@@ -136,24 +136,51 @@ def user_playlists():
     # Send GET request to retrieve user's id
     user_id = get_user_id(headers)['id']
 
-    # Send GET request to retrieve all of user's playlists
-    limit = 50
-    offset = 0
-    url = f"{API_BASE_URL}me/playlists?limit={limit}&offset={offset}"
+    # Send GET request to retrieve up to 50 of user's playlists
+    url = f"{API_BASE_URL}me/playlists?limit=50&offset=0"
     response = requests.get(url, headers=headers)
 
     if response:
         playlists = response.json()
-        playlists_by_user = get_playlists_by_user(user_id, playlists['items'])
-
-        playlists_by_user_cur_yr = get_current_year_playlists(playlists_by_user, headers)
-        print('PLAYLISTS BY USER CURRENT YEAR: ', playlists_by_user_cur_yr)
-
-        return playlists_by_user_cur_yr
+        annual_user_playlists = get_annual_user_playlists(user_id, headers, playlists['items'])
+        
+        if annual_user_playlists:
+            return annual_user_playlists
+        else:
+            return 'No playlists found for this year for current user.'
     else:
         return 'Error retrieving all playlists!'
 
 
+def get_annual_user_playlists(user_id, headers, playlists):
+    annual_user_playlists = []
+    current_year = date.today().year
+
+    for playlist in playlists:
+        # Determine if the current user created the playlist
+        if playlist['owner']['id'] != user_id:
+            continue
+
+        # Determine when the playlist was created
+        created_year = get_year_playlist_created(headers, playlist)
+        if created_year == current_year:
+            annual_user_playlists.append(playlist)
+    
+    return annual_user_playlists
+
+def get_year_playlist_created(headers, playlist):
+    current_year = date.today().year
+
+    url = f"{playlist['href']}"
+    response = requests.get(url, headers=headers)
+    playlist_info = response.json()
+    playlist_tracks = playlist_info['tracks']['items']
+
+    for track in playlist_tracks:
+        if track['added_at'] and int(track['added_at'][:4]) < current_year:
+            return None
+
+    return current_year
 
 
 # -----------------------------
@@ -174,55 +201,6 @@ def get_user_id(headers):
     url = f"{API_BASE_URL}me"
     response = requests.get(url, headers=headers)
     return response.json()
-
-
-# -----------------------------
-# Get Playlists Created by User
-#                      Function
-# -----------------------------
-def get_playlists_by_user(user_id, playlists):
-    playlists_by_user = []
-
-    for playlist in playlists:
-        if playlist['owner']['id'] == user_id:
-            playlists_by_user.append(playlist)
-
-    return playlists_by_user
-
-
-# -----------------------------
-# Get Playlists Created by User
-#            This Year Function
-# -----------------------------
-def get_current_year_playlists(playlists, headers):
-    playlists_by_current_year = []
-    current_date = date.today()
-    current_year = current_date.year
-    
-    for playlist in playlists:
-        url = f"{playlist['href']}/tracks?market=US&limit=1"
-        response = requests.get(url, headers=headers)
-        playlist_info = response.json()
-        created_year = get_playlist_created_year(playlist_info['items'])
-
-        if created_year == current_year:
-            playlists_by_current_year.append(playlist)
-        
-    print(playlists_by_current_year)
-    return playlists_by_current_year
-
-
-def get_playlist_created_year(playlists):
-    for playlist in playlists:
-        if playlist['added_at']:
-            created_year = int(playlist['added_at'][:4])
-            return created_year
-        else:
-            return None
-
-
-
-
 
 
 # -----------------------------
