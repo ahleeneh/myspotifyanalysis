@@ -130,70 +130,64 @@ def user_playlists():
 
     # Send GET request to retrieve up to 15 of user's playlists
     playlists = get_user_playlists(headers, 0, 15)
-   
-    # Find the playlists created by the current user this year
-    annual_user_playlists = get_annual_user_playlists(
-        user_id, headers, playlists['items'])
+    if not playlists:
+        return 'No playlists found for this year for the current user.'
 
-    print('found annual user playlists!')
+    # Find the playlists created by the user this year
+    filtered_playlists = get_annual_user_playlists(
+        user_id, headers, playlists.get('items', []))
 
-    if annual_user_playlists:
-        # Analyze the annual_user_playlists to get playlist analysis
-        print('analyzing the playlist results...')
-        analysis_results = analyze_users_playlists(
-            annual_user_playlists, headers)
+    if filtered_playlists:
+        # Determine total followers, avg popularity, top genres, and top artists
+        playlist_analysis = analyze_users_playlists(
+            filtered_playlists, headers)
+        return jsonify(playlist_analysis)
 
-        total_followers, avg_popularity, top_genres, top_artists = analysis_results
+    return 'No playlists found for this year for the current user.'
 
-        result_data = {
-            'annual_user_playlists': annual_user_playlists,
-            'total_followers': total_followers,
-            'avg_popularity': avg_popularity,
-            'top_genres': top_genres,
-            'top_artists': top_artists
-        }
-
-        return jsonify(result_data)
-    else:
-        return 'No playlists found for this year for current user.'
+    # --- ADD THIS WHEN CHECKING FOR RATE LIMIT ---
+    # annual_user_playlists = None
+    # ---------------------------------------------
 
 
 def get_annual_user_playlists(user_id, headers, playlists):
+    # filtered_playlists = []
+
+    # for playlist in playlists:
+    #     # Determine if the current user created the playlist
+    #     if playlist['owner']['id'] != user_id:
+    #         continue
+
+    #     # Add the playlist if the playlist was created this year
+    #     if get_year_playlist_created(headers, playlist['id']) == current_year:
+    #         filtered_playlists.append(playlist)
+
     print('getting the annual user playlists...')
 
-    annual_user_playlists = []
+    filtered_playlists = [playlist for playlist in playlists if
+                          user_id == playlist['owner']['id'] and
+                          is_playlist_created_this_year(headers, playlist['id'])]
+
+    print('found annual user playlists!')
+    return filtered_playlists
+
+
+def is_playlist_created_this_year(headers, playlist_id):
+    print('getting if playlist created this year...')
+
     current_year = date.today().year
+    playlist_items = get_playlist_items(headers, playlist_id)
 
-    for playlist in playlists:
-        # Determine if the current user created the playlist
-        if playlist['owner']['id'] != user_id:
-            continue
-
-        # Determine when the playlist was created
-        created_year = get_year_playlist_created(headers, playlist)
-        if created_year == current_year:
-            annual_user_playlists.append(playlist)
-
-    return annual_user_playlists
-
-
-def get_year_playlist_created(headers, playlist):
-    print('getting year created...')
-    current_year = date.today().year
-
-    url = f"{playlist['href']}"
-    response = requests.get(url, headers=headers)
-    playlist_info = response.json()
-    playlist_tracks = playlist_info['tracks']['items']
-
-    for track in playlist_tracks:
+    for track in playlist_items:
         if track['added_at'] and int(track['added_at'][:4]) < current_year:
-            return int(track['added_at'][:4])
+            return False
 
-    return current_year
+    return True
 
 
 def analyze_users_playlists(playlists, headers):
+    print('analyzing the playlist results...')
+
     total_followers = 0
     avg_popularity = 0
     top_artists = []
@@ -254,6 +248,15 @@ def analyze_users_playlists(playlists, headers):
     # Calculate the average popularity of all playlists
     avg_popularity = avg_popularity // len(playlists)
 
+    result_data = {
+        'annual_user_playlists': playlists,
+        'total_followers': total_followers,
+        'avg_popularity': avg_popularity,
+        'top_genres': top_genres,
+        'top_artists': top_artists
+    }
+
+    return result_data
     return total_followers, avg_popularity, top_genres, top_artists
 
 
@@ -290,6 +293,8 @@ def user_display_name():
 # -----------------------------
 # Logout Route
 # -----------------------------
+
+
 @app.route('/logout')
 def logout():
     # Clear a user's session
@@ -315,6 +320,25 @@ def get_user_info(headers):
 def get_user_playlists(headers, offset=0, limit=20):
     '''Retrieve a user's playlists'''
     url = f"{API_BASE_URL}me/playlists?offset={offset}&limit={limit}"
+
+    # try:
+    #     response = requests.get(url, headers=headers)
+
+    #     # Check for rate limiting
+    #     if response.status_code == 429:
+    #         print('Rate limited! [429]')
+
+    #     response.raise_for_status()
+
+    #     if response.headers.get("content-type") == "application/json":
+    #         return response.json()
+    #     else:
+    #         print('The response does not contain JSON content')
+    #         print(response.text)
+    # except Exception as e:
+    #     print(f"An error occurred: {e}")
+
+    # return None
     response = requests.get(url, headers=headers)
     return response.json()
 
@@ -380,7 +404,6 @@ def clear_session():
         session.pop('expires_at')
     if 'state' in session:
         session.pop('state')
-
 
 
 # -----------------------------
