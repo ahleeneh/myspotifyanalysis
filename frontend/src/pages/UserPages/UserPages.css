@@ -104,6 +104,7 @@ main {
 .main-content-container {
     padding: 20px;
     overflow-y: auto;
+    height: 100%;
 }
 
 .cards-container {
@@ -134,7 +135,7 @@ main {
     cursor: pointer;
 }
 
-.card h2 {
+.card h3 {
     font-size: 0.9rem;
 }
 
@@ -190,7 +191,7 @@ main {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--color-light-grey);
+    color: var(--color-white);
     box-sizing: border-box;
     margin-bottom: 1rem;
     padding: 1.2rem;
@@ -297,4 +298,37 @@ main {
 .title-right {
     display: flex;
     flex-direction: column;
+}
+
+
+.playlists-analysis-container {
+    margin-top: 2rem;
+}
+
+.playlists-analysis-container h2 {
+    padding: 14px;
+}
+
+.playlists-analysis-container h3 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.playlists-analysis-container p {
+    font-size: 0.9rem;
+}
+
+.analysis-card {
+    width: 24.5rem;
+    height: 11.5rem;
+    flex-direction: row;
+    gap: 1rem;
+}
+
+.analysis-card:hover {
+    cursor: default;
+}
+
+.analysis-card-right .larger-font {
+    font-size: 3.5rem;
 }

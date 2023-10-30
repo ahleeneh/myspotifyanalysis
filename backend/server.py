@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta, date
 from flask import Flask, redirect, request, jsonify, session, make_response
 from flask_cors import CORS
+from collections import Counter
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -110,7 +111,7 @@ def callback():
         session['access_token'] = token_info['access_token']
         session['refresh_token'] = token_info['refresh_token']
         session['expires_at'] = datetime.now().timestamp() + \
-                                             token_info['expires_in']
+            token_info['expires_in']
 
         # Redirect the user to the frontend user page
         return redirect(FRONTEND_REDIRECT_URL)
@@ -137,22 +138,42 @@ def user_playlists():
     # Send GET request to retrieve user's id
     user_id = get_user_id(headers)['id']
 
-    # Send GET request to retrieve up to 20 of user's playlists
-    url = f"{API_BASE_URL}me/playlists"
+    print('getting the user id....')
+
+    # Send GET request to retrieve up to 15 of user's playlists
+    url = f"{API_BASE_URL}me/playlists?offset=0&limit=15"
     response = requests.get(url, headers=headers)
     playlists = response.json()
 
     # Find the playlists created by the current user this year
     annual_user_playlists = get_annual_user_playlists(
         user_id, headers, playlists['items'])
+    
+    print('found annual user playlists!')
 
     if annual_user_playlists:
-        return annual_user_playlists
+        # Analyze the annual_user_playlists to get playlist analysis
+        print('analyzing the playlist results...')
+        analysis_results = analyze_users_playlists(annual_user_playlists, headers)
+
+        total_followers, avg_popularity, top_genres, top_artists = analysis_results
+
+        result_data = {
+            'annual_user_playlists': annual_user_playlists,
+            'total_followers': total_followers,
+            'avg_popularity': avg_popularity,
+            'top_genres': top_genres,
+            'top_artists': top_artists
+        }
+
+        return jsonify(result_data)
     else:
         return 'No playlists found for this year for current user.'
 
 
 def get_annual_user_playlists(user_id, headers, playlists):
+    print('getting the annual user playlists...')
+
     annual_user_playlists = []
     current_year = date.today().year
 
@@ -170,6 +191,7 @@ def get_annual_user_playlists(user_id, headers, playlists):
 
 
 def get_year_playlist_created(headers, playlist):
+    print('getting year created...')
     current_year = date.today().year
 
     url = f"{playlist['href']}"
@@ -179,9 +201,73 @@ def get_year_playlist_created(headers, playlist):
 
     for track in playlist_tracks:
         if track['added_at'] and int(track['added_at'][:4]) < current_year:
-            return None
+            return int(track['added_at'][:4])
 
     return current_year
+
+
+def analyze_users_playlists(playlists, headers):
+    total_followers = 0
+    avg_popularity = 0
+    top_artists = []
+    top_genres = []
+    genre_hashmap = {}
+    artist_hashmap = {}
+
+    for playlist in playlists:
+        url = f"{playlist['href']}"
+        response = requests.get(url, headers=headers)
+        playlist_info = response.json()
+
+        # Increment the number of followers
+        total_followers += int(playlist_info['followers']['total'])
+
+        # Iterate through each track in the playlist
+        playlist_tracks = playlist_info['tracks']['items']
+        total_popularity = 0
+
+        # Iterate through each track to determine popularity and top artists
+        for track in playlist_tracks:
+            total_popularity += int(track['track']['popularity'])
+            artist = track['track']['artists'][0]
+            artist_id, artist_name = artist['id'], artist['name']
+            if (artist_id, artist_name) not in artist_hashmap:
+                artist_hashmap[(artist_id, artist_name)] = 0
+            artist_hashmap[(artist_id, artist_name)] += 1
+
+        # Calculate the average popularity of tracks in playlist
+        avg_popularity += total_popularity // len(playlist_tracks)
+
+    print('playlists analyzed, artist hashmap created!')
+
+    artist_counter = Counter(artist_hashmap)
+    top_five_artists = artist_counter.most_common(5)
+    for (artist_id, artist_name), _ in top_five_artists:
+        top_artists.append(artist_name)
+
+        artist_url = f"{API_BASE_URL}artists/{artist_id}"
+        artist_response = requests.get(artist_url, headers=headers)
+        artist_info = artist_response.json()
+        artist_genres = artist_info['genres']
+
+        for genre in artist_genres:
+            if genre not in genre_hashmap:
+                genre_hashmap[genre] = 0
+            genre_hashmap[genre] += 1
+
+    genre_counter = Counter(genre_hashmap)
+    print(genre_counter)
+    top_five_genres = genre_counter.most_common(5)
+
+    for genre, _ in top_five_genres:
+        top_genres.append(genre)
+
+    print('top genres and artists found!')
+
+    # Calculate the average popularity of all playlists
+    avg_popularity = avg_popularity // len(playlists)
+
+    return total_followers, avg_popularity, top_genres, top_artists
 
 
 # -----------------------------
@@ -192,7 +278,7 @@ def playlist_tracks():
     if 'access_token' not in session:
         print('Session expired!')
         return redirect(FRONTEND_LOGIN_URL)
-    
+
     # Retrieve new refresh token if access token expired
     if datetime.now().timestamp() > session['expires_at']:
         refresh_access_token()
@@ -206,11 +292,10 @@ def playlist_tracks():
     }
 
     # Send GET request to retrieve a playlist's tracks
-    url = f"{API_BASE_URL}playlists/{playlist_id}/tracks" 
+    url = f"{API_BASE_URL}playlists/{playlist_id}/tracks"
     response = requests.get(url, headers=headers)
     playlist_tracks = response.json()
 
-    print(playlist_tracks['items'])
     return playlist_tracks['items']
 
 
@@ -222,7 +307,7 @@ def user_display_name():
     if 'access_token' not in session:
         print('Session expired!')
         return redirect(FRONTEND_LOGIN_URL)
-    
+
     # Retrieve new refresh token if access token expired
     if datetime.now().timestamp() > session['expires_at']:
         refresh_access_token()
@@ -233,16 +318,17 @@ def user_display_name():
     }
 
     # Send GET request to retrieve a playlist's tracks
-    url = f"{API_BASE_URL}me" 
+    url = f"{API_BASE_URL}me"
     response = requests.get(url, headers=headers)
     user_info = response.json()
 
-    print(user_info['display_name'])
     return user_info['display_name']
 
 # -----------------------------
 # Logout Route
 # -----------------------------
+
+
 @app.route('/logout')
 def logout():
     clear_session()

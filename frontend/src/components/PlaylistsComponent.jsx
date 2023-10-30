@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import empty from '../images/empty.png';
+import topartists from '../images/topartists.png';
+import topgenres from '../images/topgenres.png';
+import totalfollowers from '../images/totalfollowers.png';
+import averagepopularity from '../images/averagepopularity.png';
 
 import PlaylistTracksComponent from './PlaylistTracksComponent';
 
-function PlaylistsComponent({ playlists, isLoading }) {
+function PlaylistsComponent({ playlistAnalysisData, isLoading }) {
+    const { annualUserPlaylists, totalFollowers, avgPopularity, topGenres, topArtists } = playlistAnalysisData;
     const [selectedPlaylist, setSelectedPlaylist] = useState(null);
     const [playlistTracks, setPlaylistTracks] = useState([]);
     const [playlistImage, setPlaylistImage] = useState(null);
@@ -19,13 +24,10 @@ function PlaylistsComponent({ playlists, isLoading }) {
 
             const playlistTracks = response.data;
 
-            console.log(playlistTracks)
-
             setSelectedPlaylist(playlistId);
             setPlaylistTracks(playlistTracks);
             setPlaylistName(playlistName);
             setPlaylistDescription(playlistDescription);
-
             if (playlistImages && playlistImages.length > 0) {
                 setPlaylistImage(playlistImages[0].url);
             }
@@ -54,11 +56,11 @@ function PlaylistsComponent({ playlists, isLoading }) {
         <div className="main-content-container">
             <h1>playlists '23</h1>
 
-            <p>loading...</p>
+            <p>finding and analyzing all your playlists created this year...</p>
         </div>
     )
 
-    if (playlists && playlists.length > 0) {
+    if (annualUserPlaylists && annualUserPlaylists.length > 0) {
         if (selectedPlaylist) {
             return (
                 <div className="main-content-container">
@@ -76,7 +78,7 @@ function PlaylistsComponent({ playlists, isLoading }) {
                 <div className="main-content-container">
                     <h1>playlists '23</h1>
                     <div className="cards-container">
-                        {playlists.map((playlist) => (
+                        {annualUserPlaylists.map((playlist) => (
                             <div
                                 className="card"
                                 key={playlist.id}
@@ -87,12 +89,56 @@ function PlaylistsComponent({ playlists, isLoading }) {
                                 ) : (
                                     <img src={empty} className="card-image" />
                                 )}
-                                <h2>{truncateText(playlist.name, 19)}</h2>
+                                <h3>{truncateText(playlist.name, 19)}</h3>
                                 <p>{truncateText(playlist.description, 35)}</p>
                             </div>
                         ))}
                     </div>
-                </div>
+
+                    <div className="playlists-analysis-container">
+                        <h2>playlist '23 wrapped</h2>
+
+                        <div className="cards-container">
+                            <div className="card analysis-card">
+                                <img src={topartists} className="card-image" />
+                                <div className="analysis-card-right">
+                                    <h3>top playlist artists</h3>
+                                    {topArtists.map((artist, index) => (
+                                        <p key={index}>{index + 1}: {artist}</p>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="card analysis-card">
+                                <img src={topgenres} className="card-image" />
+                                <div className="analysis-card-right">
+                                    <h3>top playlist genres</h3>
+                                    {topGenres.map((genre, index) => (
+                                        <p key={index}>{index + 1}: {genre}</p>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="card analysis-card">
+                                <img src={averagepopularity} className="card-image" />
+                                <div className="analysis-card-right">
+                                    <h3>average popularity</h3>
+                                    <p className="larger-font">{avgPopularity}%</p>
+                                </div>
+                            </div>
+
+                            <div className="card analysis-card">
+                                <img src={totalfollowers} className="card-image" />
+                                <div className="analysis-card-right">
+                                    <h3>total followers</h3>
+                                    <p className="larger-font">{totalFollowers}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div >
             );
         }
     }
@@ -104,7 +150,7 @@ function PlaylistsComponent({ playlists, isLoading }) {
             <div className="cards-container">
                 <div className="card">
                     <img src={empty} className="card-image" />
-                    <h2>empty</h2>
+                    <h3>empty</h3>
                     <p>you haven't created any this year!</p>
                 </div>
             </div>
