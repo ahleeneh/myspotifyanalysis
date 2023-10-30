@@ -320,9 +320,15 @@ main {
 
 .analysis-card {
     width: 24.5rem;
-    height: 11.5rem;
+    height: 11.6rem;
     flex-direction: row;
     gap: 1rem;
+
+}
+
+.analysis-card-right {
+    overflow-y: scroll;
+    width: 100%;
 }
 
 .analysis-card:hover {

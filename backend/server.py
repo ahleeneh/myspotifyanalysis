@@ -122,21 +122,11 @@ def callback():
 # -----------------------------
 @app.route('/user-playlists')
 def user_playlists():
-    if 'access_token' not in session:
-        print('Session expired!')
-        return redirect(FRONTEND_LOGIN_URL)
-
-    # Retrieve new refresh token if access token expired
-    if datetime.now().timestamp() > session['expires_at']:
-        refresh_access_token()
-
-    # Create header and query params to use Spotify Web API
-    headers = {
-        'Authorization': f"Bearer {session['access_token']}"
-    }
+    # Check and get spotify headers to use Spotify Web API
+    headers = get_spotify_headers()
 
     # Send GET request to retrieve user's id
-    user_id = get_user_id(headers)['id']
+    user_id = get_user_info(headers)['id']
 
     print('getting the user id....')
 
@@ -148,13 +138,14 @@ def user_playlists():
     # Find the playlists created by the current user this year
     annual_user_playlists = get_annual_user_playlists(
         user_id, headers, playlists['items'])
-    
+
     print('found annual user playlists!')
 
     if annual_user_playlists:
         # Analyze the annual_user_playlists to get playlist analysis
         print('analyzing the playlist results...')
-        analysis_results = analyze_users_playlists(annual_user_playlists, headers)
+        analysis_results = analyze_users_playlists(
+            annual_user_playlists, headers)
 
         total_followers, avg_popularity, top_genres, top_artists = analysis_results
 
@@ -275,21 +266,11 @@ def analyze_users_playlists(playlists, headers):
 # -----------------------------
 @app.route('/playlist-tracks')
 def playlist_tracks():
-    if 'access_token' not in session:
-        print('Session expired!')
-        return redirect(FRONTEND_LOGIN_URL)
-
-    # Retrieve new refresh token if access token expired
-    if datetime.now().timestamp() > session['expires_at']:
-        refresh_access_token()
+    # Check and get spotify headers to use Spotify Web API
+    headers = get_spotify_headers()
 
     # Retrieve the playlist Id from the query parameters
     playlist_id = request.args.get('playlistId')
-
-    # Create header to use Spotify Web API
-    headers = {
-        'Authorization': f"Bearer {session['access_token']}"
-    }
 
     # Send GET request to retrieve a playlist's tracks
     url = f"{API_BASE_URL}playlists/{playlist_id}/tracks"
@@ -304,25 +285,13 @@ def playlist_tracks():
 # -----------------------------
 @app.route('/user-display-name')
 def user_display_name():
-    if 'access_token' not in session:
-        print('Session expired!')
-        return redirect(FRONTEND_LOGIN_URL)
+    # Check and get spotify headers to use Spotify Web API
+    headers = get_spotify_headers()
 
-    # Retrieve new refresh token if access token expired
-    if datetime.now().timestamp() > session['expires_at']:
-        refresh_access_token()
+    # Send GET request to retrieve user's display name
+    user_display_name = get_user_info(headers)['display_name']
 
-    # Create header to use Spotify Web API
-    headers = {
-        'Authorization': f"Bearer {session['access_token']}"
-    }
-
-    # Send GET request to retrieve a playlist's tracks
-    url = f"{API_BASE_URL}me"
-    response = requests.get(url, headers=headers)
-    user_info = response.json()
-
-    return user_info['display_name']
+    return user_display_name
 
 # -----------------------------
 # Logout Route
@@ -340,13 +309,30 @@ def logout():
 # -----------------------------
 # Additional Functions
 # -----------------------------
-def get_user_id(headers):
+def get_user_info(headers):
     '''
     Retrieve a user's id.
     '''
     url = f"{API_BASE_URL}me"
     response = requests.get(url, headers=headers)
     return response.json()
+
+
+def get_spotify_headers():
+    if 'access_token' not in session:
+        print('Session expired!')
+        return redirect(FRONTEND_LOGIN_URL)
+
+    # Retrieve new refresh token if access token expired
+    if datetime.now().timestamp() > session['expires_at']:
+        refresh_access_token()
+
+    # Create header and query params to use Spotify Web API
+    headers = {
+        'Authorization': f"Bearer {session['access_token']}"
+    }
+
+    return headers
 
 
 def refresh_access_token():
