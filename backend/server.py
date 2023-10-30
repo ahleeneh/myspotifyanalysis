@@ -122,19 +122,15 @@ def callback():
 # -----------------------------
 @app.route('/user-playlists')
 def user_playlists():
-    # Check and get spotify headers to use Spotify Web API
+    # Generate spotify headers to use for Spotify Web API
     headers = get_spotify_headers()
 
     # Send GET request to retrieve user's id
     user_id = get_user_info(headers)['id']
 
-    print('getting the user id....')
-
     # Send GET request to retrieve up to 15 of user's playlists
-    url = f"{API_BASE_URL}me/playlists?offset=0&limit=15"
-    response = requests.get(url, headers=headers)
-    playlists = response.json()
-
+    playlists = get_user_playlists(headers, 0, 15)
+   
     # Find the playlists created by the current user this year
     annual_user_playlists = get_annual_user_playlists(
         user_id, headers, playlists['items'])
@@ -266,18 +262,16 @@ def analyze_users_playlists(playlists, headers):
 # -----------------------------
 @app.route('/playlist-tracks')
 def playlist_tracks():
-    # Check and get spotify headers to use Spotify Web API
+    # Generate spotify headers to use for Spotify Web API
     headers = get_spotify_headers()
 
     # Retrieve the playlist Id from the query parameters
     playlist_id = request.args.get('playlistId')
 
-    # Send GET request to retrieve a playlist's tracks
-    url = f"{API_BASE_URL}playlists/{playlist_id}/tracks"
-    response = requests.get(url, headers=headers)
-    playlist_tracks = response.json()
+    # Send GET request to retrieve a playlist's items
+    playlist_items = get_playlist_items(headers, playlist_id)
 
-    return playlist_tracks['items']
+    return playlist_items
 
 
 # -----------------------------
@@ -285,7 +279,7 @@ def playlist_tracks():
 # -----------------------------
 @app.route('/user-display-name')
 def user_display_name():
-    # Check and get spotify headers to use Spotify Web API
+    # Generate spotify headers to use for Spotify Web API
     headers = get_spotify_headers()
 
     # Send GET request to retrieve user's display name
@@ -296,28 +290,45 @@ def user_display_name():
 # -----------------------------
 # Logout Route
 # -----------------------------
-
-
 @app.route('/logout')
 def logout():
+    # Clear a user's session
     clear_session()
+
+    # Delete cookie
     response = make_response('Logged out!')
     response.delete_cookie('MY SPOTIFY ANALYSIS COOKIE COOKIE!')
+
     return response
 
 
 # -----------------------------
-# Additional Functions
+# Spotify Web API Functions
 # -----------------------------
 def get_user_info(headers):
-    '''
-    Retrieve a user's id.
-    '''
+    '''Retrieve a user's id.'''
     url = f"{API_BASE_URL}me"
     response = requests.get(url, headers=headers)
     return response.json()
 
 
+def get_user_playlists(headers, offset=0, limit=20):
+    '''Retrieve a user's playlists'''
+    url = f"{API_BASE_URL}me/playlists?offset={offset}&limit={limit}"
+    response = requests.get(url, headers=headers)
+    return response.json()
+
+
+def get_playlist_items(headers, playlist_id):
+    '''Retrieve a playlist's items'''
+    url = f"{API_BASE_URL}playlists/{playlist_id}/tracks"
+    response = requests.get(url, headers=headers)
+    return response.json()['items']
+
+
+# -----------------------------
+# Helper OAuth2 Functions
+# -----------------------------
 def get_spotify_headers():
     if 'access_token' not in session:
         print('Session expired!')
@@ -336,10 +347,9 @@ def get_spotify_headers():
 
 
 def refresh_access_token():
-    '''
-    Exchange a refresh token, if valid, for a new access token.
-    '''
+    '''Exchange a refresh token, if valid, for a new access token.'''
     print('Refreshing token!')
+
     if 'refresh_token' in session and datetime.now().timestamp() > session['expires_at']:
         req_body = {
             'grant_type': 'refresh_token',
@@ -361,9 +371,7 @@ def refresh_access_token():
 
 
 def clear_session():
-    '''
-    Clear a user's session.
-    '''
+    '''Clear a user's session.'''
     if 'access_token' in session:
         session.pop('access_token')
     if 'refresh_token' in session:
@@ -372,6 +380,7 @@ def clear_session():
         session.pop('expires_at')
     if 'state' in session:
         session.pop('state')
+
 
 
 # -----------------------------
