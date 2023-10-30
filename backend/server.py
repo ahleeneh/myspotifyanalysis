@@ -15,12 +15,10 @@ load_dotenv()
 CLIENT_ID = os.environ.get('CLIENT_ID')
 CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
 SECRET_KEY = os.environ.get('SECRET_KEY')
-
-# Spotify Web API URLs
-REDIRECT_URI = 'http://localhost:6393/callback'
-AUTH_URL = 'https://accounts.spotify.com/authorize'
-TOKEN_URL = 'https://accounts.spotify.com/api/token'
-API_BASE_URL = 'https://api.spotify.com/v1/'
+REDIRECT_URI = os.environ.get('REDIRECT_URI')
+AUTH_URL = os.environ.get('AUTH_URL')
+TOKEN_URL = os.environ.get('TOKEN_URL')
+API_BASE_URL = os.environ.get('API_BASE_URL')
 
 # Redirect Front-End URLS
 FRONTEND_LOGIN_URL = 'http://localhost:1890'
@@ -145,23 +143,8 @@ def user_playlists():
 
     return 'No playlists found for this year for the current user.'
 
-    # --- ADD THIS WHEN CHECKING FOR RATE LIMIT ---
-    # annual_user_playlists = None
-    # ---------------------------------------------
-
 
 def get_annual_user_playlists(user_id, headers, playlists):
-    # filtered_playlists = []
-
-    # for playlist in playlists:
-    #     # Determine if the current user created the playlist
-    #     if playlist['owner']['id'] != user_id:
-    #         continue
-
-    #     # Add the playlist if the playlist was created this year
-    #     if get_year_playlist_created(headers, playlist['id']) == current_year:
-    #         filtered_playlists.append(playlist)
-
     print('getting the annual user playlists...')
 
     filtered_playlists = [playlist for playlist in playlists if
@@ -257,7 +240,6 @@ def analyze_users_playlists(playlists, headers):
     }
 
     return result_data
-    return total_followers, avg_popularity, top_genres, top_artists
 
 
 # -----------------------------
