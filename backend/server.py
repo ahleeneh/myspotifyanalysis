@@ -1,3 +1,7 @@
+# Implement's Spotify's Web API: https://developer.spotify.com/documentation/web-api
+# Create Flask application: https://code.visualstudio.com/docs/python/tutorial-flask
+
+
 import os
 import requests
 import secrets
@@ -88,8 +92,6 @@ def callback():
         # Determine if the states are the same
         received_state = request.args.get('state')
         stored_session_state = session.get('state')
-        print(received_state)
-        print(stored_session_state)
 
         if received_state != stored_session_state:
             return 'Invalid state parameters! Possible CSRF attack!'
@@ -224,8 +226,6 @@ def analyze_users_playlists(playlists, headers):
     }
 
     return result_data
-
-
 
 
 
