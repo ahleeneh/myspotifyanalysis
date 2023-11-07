@@ -88,6 +88,8 @@ def callback():
         # Determine if the states are the same
         received_state = request.args.get('state')
         stored_session_state = session.get('state')
+        print(received_state)
+        print(stored_session_state)
 
         if received_state != stored_session_state:
             return 'Invalid state parameters! Possible CSRF attack!'
@@ -132,7 +134,7 @@ def user_playlists():
         return 'No playlists found for this year for the current user.'
 
     # Find the playlists created by the user this year
-    filtered_playlists = get_annual_user_playlists(
+    filtered_playlists = filter_cur_year_playlists_by_user(
         user_id, headers, playlists.get('items', []))
 
     if filtered_playlists:
@@ -144,7 +146,7 @@ def user_playlists():
     return 'No playlists found for this year for the current user.'
 
 
-def get_annual_user_playlists(user_id, headers, playlists):
+def filter_cur_year_playlists_by_user(user_id, headers, playlists):
     print('getting the annual user playlists...')
 
     filtered_playlists = [playlist for playlist in playlists if
@@ -178,47 +180,29 @@ def analyze_users_playlists(playlists, headers):
     genre_hashmap = {}
     artist_hashmap = {}
 
+    # Iterate through each playlist to find the artists, followers, popularity
     for playlist in playlists:
-        url = f"{playlist['href']}"
-        response = requests.get(url, headers=headers)
-        playlist_info = response.json()
-
-        # Increment the number of followers
-        total_followers += int(playlist_info['followers']['total'])
-
-        # Iterate through each track in the playlist
-        playlist_tracks = playlist_info['tracks']['items']
-        total_popularity = 0
-
-        # Iterate through each track to determine popularity and top artists
-        for track in playlist_tracks:
-            total_popularity += int(track['track']['popularity'])
-            artist = track['track']['artists'][0]
-            artist_id, artist_name = artist['id'], artist['name']
-            if (artist_id, artist_name) not in artist_hashmap:
-                artist_hashmap[(artist_id, artist_name)] = 0
-            artist_hashmap[(artist_id, artist_name)] += 1
-
-        # Calculate the average popularity of tracks in playlist
-        avg_popularity += total_popularity // len(playlist_tracks)
+        playlist_info = get_playlist(headers, playlist['id'])
+        popularity, followers, artist_hashmap = analyze_playlist(playlist_info, artist_hashmap)
+        total_followers += followers
+        avg_popularity += popularity
 
     print('playlists analyzed, artist hashmap created!')
 
+    # Find the top 5 artists
     artist_counter = Counter(artist_hashmap)
     top_five_artists = artist_counter.most_common(5)
+
     for (artist_id, artist_name), _ in top_five_artists:
         top_artists.append(artist_name)
-
-        artist_url = f"{API_BASE_URL}artists/{artist_id}"
-        artist_response = requests.get(artist_url, headers=headers)
-        artist_info = artist_response.json()
-        artist_genres = artist_info['genres']
+        artist_genres = get_artist_genres(headers, artist_id)
 
         for genre in artist_genres:
             if genre not in genre_hashmap:
                 genre_hashmap[genre] = 0
             genre_hashmap[genre] += 1
 
+    # Create genre hashmap
     genre_counter = Counter(genre_hashmap)
     print(genre_counter)
     top_five_genres = genre_counter.most_common(5)
@@ -240,6 +224,9 @@ def analyze_users_playlists(playlists, headers):
     }
 
     return result_data
+
+
+
 
 
 # -----------------------------
@@ -325,11 +312,46 @@ def get_user_playlists(headers, offset=0, limit=20):
     return response.json()
 
 
+def get_playlist(headers, playlist_id):
+    '''Retrieve a playlist's full details'''
+    url = f"{API_BASE_URL}playlists/{playlist_id}"
+    response = requests.get(url, headers=headers)
+    return response.json()
+
+def analyze_playlist(playlist, artist_hashmap=None):
+    '''Playlist contains full playlist information and ['items']'''
+    artist_hashmap = {} if artist_hashmap is None else artist_hashmap
+    total_popularity = 0
+    playlist_tracks = playlist['tracks']['items']
+
+    # Iterate through each track to determine popularity and top artists
+    for track in playlist_tracks:
+        total_popularity += int(track['track']['popularity'])
+        artist = track['track']['artists'][0]
+        artist_id, artist_name = artist['id'], artist['name']
+        if (artist_id, artist_name) not in artist_hashmap:
+            artist_hashmap[(artist_id, artist_name)] = 0
+        artist_hashmap[(artist_id, artist_name)] += 1
+    
+    # Find the average popularity and total number of followers
+    avg_popularity = total_popularity // len(playlist_tracks)
+    total_followers = int(playlist['followers']['total'])
+
+    return avg_popularity, total_followers, artist_hashmap
+
+
 def get_playlist_items(headers, playlist_id):
     '''Retrieve a playlist's items'''
     url = f"{API_BASE_URL}playlists/{playlist_id}/tracks"
     response = requests.get(url, headers=headers)
     return response.json()['items']
+
+
+def get_artist_genres(headers, artist_id):
+    '''Retrieve an artist's associated genres'''
+    url = f"{API_BASE_URL}artists/{artist_id}"
+    response = requests.get(url, headers=headers)
+    return response.json()['genres']
 
 
 # -----------------------------

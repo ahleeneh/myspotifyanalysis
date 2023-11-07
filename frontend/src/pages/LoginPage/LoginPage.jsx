@@ -46,19 +46,19 @@ function LoginPage() {
                     <div className="feature-card">
                         <img src={dawn} className="card-image" />
                         <h2>top tracks</h2>
-                        <p>top songs: 4 weeks, 6 months, all-time</p>
+                        <p>coming soon!</p>
                     </div>
 
                     <div className="feature-card">
                         <img src={cliff} className="card-image" />
                         <h2>top artists</h2>
-                        <p>top artists: 4 weeks, 6 months, all-time</p>
+                        <p>coming soon!</p>
                     </div>
 
                     <div className="feature-card">
                         <img src={sea} className="card-image" />
                         <h2>recommended</h2>
-                        <p>view artists, songs, and genres for you</p>
+                        <p>coming soon!</p>
                     </div>
                 </div>
             </div>
