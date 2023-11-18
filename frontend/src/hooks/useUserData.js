@@ -4,6 +4,7 @@ import axios from 'axios';
 
 function useUserData() {
     const navigate = useNavigate();
+    const [displayName, setDisplayName] = useState(null);
     const [playlistAnalysisData, setPlaylistAnalysisData] = useState({
         annualUserPlaylists: [],
         totalFollowers: 0,
@@ -11,10 +12,18 @@ function useUserData() {
         topGenres: [],
         topArtists: [],
     });
+    const [topTracks, setTopTracks] = useState({
+        long_term: null,
+        medium_term: null,
+        short_term: null
+    });
+    const [topArtists, setTopArtists] = useState({
+        long_term: null,
+        medium_term: null,
+        short_term: null
+    });
     const [isLoading, setIsLoading] = useState(true);
-    const [displayName, setDisplayName] = useState(null);
-    // const [topTracks, setTopTracks] = useState([]);
-    // const [topArtists, setTopArtists] = useState([]);
+
 
     const getUserPlaylists = async () => {
         try {
@@ -58,12 +67,55 @@ function useUserData() {
         }
     }
 
+    const getTopArtists = async (timeRange) => {
+        try {
+            let itemType = 'artists';
+            let limit = 20;
+            const response = await axios.get(`http://localhost:6393/top-items?itemType=${itemType}&timeRange=${timeRange}&limit=${limit}`, {
+                withCredentials: true
+            });
+
+            setTopArtists(prevState => ({
+                ...prevState,
+                [timeRange]: response.data.items,
+            }));
+        } catch (error) {
+            console.error('Error:', error)
+        }
+    }
+
+    const getTopTracks = async (timeRange) => {
+        try {
+            let itemType = 'tracks';
+            let limit = 20;
+            const response = await axios.get(`http://localhost:6393/top-items?itemType=${itemType}&timeRange=${timeRange}&limit=${limit}`, {
+                withCredentials: true
+            });
+
+            setTopTracks(prevState => ({
+                ...prevState,
+                [timeRange]: response.data.items,
+            }));
+        } catch (error) {
+            console.error('Error:', error)
+        }
+    }
+
     useEffect(() => {
         getUserPlaylists();
         getDisplayName();
     }, []);
 
-    return { playlistAnalysisData, displayName, isLoading };
+    useEffect(() => {
+        getTopTracks('long_term');
+        getTopTracks('medium_term');
+        getTopTracks('short_term');
+        getTopArtists('long_term');
+        getTopArtists('medium_term');
+        getTopArtists('short_term');
+    }, []);
+
+    return { playlistAnalysisData, displayName, isLoading, topTracks, topArtists };
 }
 
 export default useUserData;

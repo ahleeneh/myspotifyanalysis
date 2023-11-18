@@ -1,40 +1,12 @@
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 
-function TopTracksComponent() {
-    const [topTracks, setTopTracks] = useState({
-        long_term: null,
-        medium_term: null,
-        short_term: null
-    });
+function TopTracksComponent({ topTracks }) {
     const [selectedTimeRange, setSelectedTimeRange] = useState('long_term');
-
-    const getTopTracks = async (timeRange) => {
-        try {
-            let itemType = 'tracks';
-            let limit = 20;
-            const response = await axios.get(`http://localhost:6393/top-items?itemType=${itemType}&timeRange=${timeRange}&limit=${limit}`, {
-                withCredentials: true
-            });
-
-            setTopTracks(prevState => ({
-                ...prevState,
-                [timeRange]: response.data.items,
-            }));
-        } catch (error) {
-            console.error('Error:', error)
-        }
-    }
 
     const handleTimeRangeClick = (timeRange) => {
         setSelectedTimeRange(timeRange);
     };
-
-    useEffect(() => {
-        getTopTracks('long_term');
-        getTopTracks('medium_term');
-        getTopTracks('short_term');
-    }, []);
 
     return (
         <div className="main-content-container">
