@@ -2,8 +2,11 @@ import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 
 function TopArtistsComponent() {
-    const [topArtists, setTopArtists] = useState(null);
-    const [next, setNext] = useState(null);
+    const [topArtists, setTopArtists] = useState({
+        long_term: null,
+        medium_term: null,
+        short_term: null
+    });
     const [selectedTimeRange, setSelectedTimeRange] = useState('long_term');
 
     const getTopArtists = async (timeRange) => {
@@ -14,9 +17,10 @@ function TopArtistsComponent() {
                 withCredentials: true
             });
 
-            console.log(response.data);
-            setTopArtists(response.data.items);
-            setNext(response.data.next);
+            setTopArtists(prevState => ({
+                ...prevState,
+                [timeRange]: response.data.items,
+            }));
         } catch (error) {
             console.error('Error:', error)
         }
@@ -27,8 +31,10 @@ function TopArtistsComponent() {
     };
 
     useEffect(() => {
-        getTopArtists(selectedTimeRange);
-    }, [selectedTimeRange]);
+        getTopArtists('long_term');
+        getTopArtists('medium_term');
+        getTopArtists('short_term');
+    }, []);
 
     return (
         <div className="main-content-container">
@@ -55,7 +61,7 @@ function TopArtistsComponent() {
                 </button>
             </div>
 
-            {topArtists ? (
+            {topArtists[selectedTimeRange] ? (
                 <div className="playlist-table">
                     <table>
                         <thead>
@@ -68,7 +74,7 @@ function TopArtistsComponent() {
                         </thead>
 
                         <tbody>
-                            {topArtists.map((artist, index) => (
+                            {topArtists[selectedTimeRange].map((artist, index) => (
                                 <tr key={index} className="border-radius">
                                     <td>{index + 1}</td>
                                     <td>
@@ -87,7 +93,8 @@ function TopArtistsComponent() {
                     </table>
                 </div>
             ) : (
-                <p>loading...</p>
+                <div className="playlist-table">
+                </div>
             )}
         </div>
     )

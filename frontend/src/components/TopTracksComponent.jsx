@@ -2,8 +2,11 @@ import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 
 function TopTracksComponent() {
-    const [topTracks, setTopTracks] = useState(null);
-    const [next, setNext] = useState(null);
+    const [topTracks, setTopTracks] = useState({
+        long_term: null,
+        medium_term: null,
+        short_term: null
+    });
     const [selectedTimeRange, setSelectedTimeRange] = useState('long_term');
 
     const getTopTracks = async (timeRange) => {
@@ -14,9 +17,10 @@ function TopTracksComponent() {
                 withCredentials: true
             });
 
-            console.log(response.data.items);
-            setTopTracks(response.data.items);
-            setNext(response.data.next);
+            setTopTracks(prevState => ({
+                ...prevState,
+                [timeRange]: response.data.items,
+            }));
         } catch (error) {
             console.error('Error:', error)
         }
@@ -27,8 +31,10 @@ function TopTracksComponent() {
     };
 
     useEffect(() => {
-        getTopTracks(selectedTimeRange);
-    }, [selectedTimeRange]);
+        getTopTracks('long_term');
+        getTopTracks('medium_term');
+        getTopTracks('short_term');
+    }, []);
 
     return (
         <div className="main-content-container">
@@ -55,7 +61,7 @@ function TopTracksComponent() {
                 </button>
             </div>
 
-            {topTracks ? (
+            {topTracks[selectedTimeRange] ? (
                 <div className="playlist-table">
                     <table>
                         <thead>
@@ -69,7 +75,7 @@ function TopTracksComponent() {
                         </thead>
 
                         <tbody>
-                            {topTracks.map((song, index) => (
+                            {topTracks[selectedTimeRange].map((song, index) => (
                                 <tr key={index} className="border-radius">
                                     <td>{index + 1}</td>
                                     <td>
@@ -93,7 +99,8 @@ function TopTracksComponent() {
                     </table>
                 </div>
             ) : (
-                <p>loading...</p>
+                <div className="playlist-table">
+                </div>
             )}
         </div>
     )
