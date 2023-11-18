@@ -40,7 +40,7 @@ function SidebarLinksComponent({ onSelectLink, selectedLink }) {
                     <img src={dawn} className="link-image" />
                     <div className="link-card-text">
                         <h3>top tracks</h3>
-                        <p>top artists: 4 weeks, 6 months, all-time</p>
+                        <p>top artists: all-time, 6 months, 4 weeks</p>
                     </div>
                 </div>
 
@@ -48,7 +48,7 @@ function SidebarLinksComponent({ onSelectLink, selectedLink }) {
                     <img src={cliff} className="link-image" />
                     <div className="link-card-text">
                         <h3>top artists</h3>
-                        <p>top songs: 4 weeks, 6 months, all-time</p>
+                        <p>top songs: all-time, 6 months, 4 weeks</p>
                     </div>
                 </div>
 

@@ -46,13 +46,13 @@ function LoginPage() {
                     <div className="feature-card">
                         <img src={dawn} className="card-image" />
                         <h2>top tracks</h2>
-                        <p>coming soon!</p>
+                        <p>all-time, 6 months, 4 weeks</p>
                     </div>
 
                     <div className="feature-card">
                         <img src={cliff} className="card-image" />
                         <h2>top artists</h2>
-                        <p>coming soon!</p>
+                        <p>all-time, 6 months, 4 weeks</p>
                     </div>
 
                     <div className="feature-card">

@@ -338,3 +338,34 @@ main {
 .analysis-card-right .larger-font {
     font-size: 3.5rem;
 }
+
+.time-range-slider {
+    background-color: none;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-evenly;
+    gap: 1.5rem;
+}
+
+.time-range-slider button {
+    background-color: inherit;
+    background-color: var(--color-card);
+    border-radius: var(--border-radius-card);
+    color: white;
+    font-size: 0.9rem;
+    width: 100%;
+}
+
+.time-range-slider button:hover {
+    background-color: var(--color-card-hover);
+}
+
+.time-range-slider button:focus,
+.time-range-slider button:focus-visible {
+    outline: none;
+}
+
+.time-range-slider .selected {
+    background-color: var(--color-card-hover);
+    transition: background-color 0.25s;
+}

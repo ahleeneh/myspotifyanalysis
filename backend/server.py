@@ -232,6 +232,25 @@ def playlist_tracks():
 
 
 # -----------------------------
+# Get User's Top Items
+# -----------------------------
+@app.route('/top-items')
+def top_items():
+    # Generate spotify headers to use for Spotify Web API
+    headers = get_spotify_headers()
+
+    # Retrieve the itemType, timeRange, and limit from the query parameters
+    item_type = request.args.get('itemType')
+    time_range = request.args.get('timeRange')
+    limit = request.args.get('limit')
+
+    # Send GET request to retrieve a user's top items
+    top_items = get_users_top_items(headers, item_type, time_range, limit)
+
+    return jsonify(top_items)
+
+
+# -----------------------------
 # Get User Display Name Route
 # -----------------------------
 @app.route('/user-display-name')
@@ -306,6 +325,14 @@ def get_playlist_items(headers, playlist_id):
 def get_several_artists(headers, artist_ids):
     '''Retrieve several artist's full details'''
     url = f"{API_BASE_URL}artists?ids={artist_ids}"
+    response = requests.get(url, headers=headers)
+    return response.json()
+
+
+def get_users_top_items(headers, item_type, time_range, limit=20):
+    '''Retrieve the current user's top artists or tracks based on calculated affinity.'''
+    print(item_type, time_range, limit)
+    url = f"{API_BASE_URL}me/top/{item_type}?time_range={time_range}&limit={limit}"
     response = requests.get(url, headers=headers)
     return response.json()
 
