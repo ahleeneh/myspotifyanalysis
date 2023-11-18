@@ -45,20 +45,20 @@ function SidebarLinksComponent({ onSelectLink, selectedLink }) {
                 </div>
 
                 <div className={`link-card ${selectedLink === 'top-artists' ? 'active' : ''}`} onClick={() => onSelectLink('top-artists')}>
-                    <img src={cliff} className="link-image" />
+                    <img src={sea} className="link-image" />
                     <div className="link-card-text">
                         <h3>top artists</h3>
                         <p>top songs: all-time, 6 months, 4 weeks</p>
                     </div>
                 </div>
 
-                <div className={`link-card ${selectedLink === 'recommended' ? 'active' : ''}`} onClick={() => onSelectLink('recommended')}>
-                    <img src={sea} className="link-image" />
+                {/* <div className={`link-card ${selectedLink === 'recommended' ? 'active' : ''}`} onClick={() => onSelectLink('recommended')}>
+                    <img src={cliff} className="link-image" />
                     <div className="link-card-text">
                         <h3>recommended</h3>
                         <p>view artists, songs, and genres for you</p>
                     </div>
-                </div>
+                </div> */}
 
             </div>
 

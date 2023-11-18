@@ -50,16 +50,16 @@ function LoginPage() {
                     </div>
 
                     <div className="feature-card">
-                        <img src={cliff} className="card-image" />
+                        <img src={sea} className="card-image" />
                         <h2>top artists</h2>
                         <p>all-time, 6 months, 4 weeks</p>
                     </div>
 
-                    <div className="feature-card">
-                        <img src={sea} className="card-image" />
+                    {/* <div className="feature-card">
+                        <img src={cliff} className="card-image" />
                         <h2>recommended</h2>
                         <p>coming soon!</p>
-                    </div>
+                    </div> */}
                 </div>
             </div>
 

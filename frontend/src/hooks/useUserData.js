@@ -17,11 +17,12 @@ function useUserData() {
         medium_term: null,
         short_term: null
     });
-    const [topArtists, setTopArtists] = useState({
+    const [topArtistsData, setTopArtistsData] = useState({
         long_term: null,
         medium_term: null,
         short_term: null
     });
+    const [artistRecommendations, setArtistRecommendations] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
 
@@ -75,7 +76,7 @@ function useUserData() {
                 withCredentials: true
             });
 
-            setTopArtists(prevState => ({
+            setTopArtistsData(prevState => ({
                 ...prevState,
                 [timeRange]: response.data.items,
             }));
@@ -115,7 +116,8 @@ function useUserData() {
         getTopArtists('short_term');
     }, []);
 
-    return { playlistAnalysisData, displayName, isLoading, topTracks, topArtists };
+
+    return { playlistAnalysisData, displayName, isLoading, topTracks, topArtistsData };
 }
 
 export default useUserData;

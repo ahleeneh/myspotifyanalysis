@@ -14,7 +14,7 @@ import useUserData from '../../hooks/useUserData';
 function userPage() {
     const navigate = useNavigate();
     const [selectedLink, setSelectedLink] = useState('user-playlists');
-    const { playlistAnalysisData, displayName, isLoading, topTracks, topArtists } = useUserData();
+    const { playlistAnalysisData, displayName, isLoading, topTracks, topArtistsData } = useUserData();
 
     return (
         <div className="user-page">
@@ -29,23 +29,23 @@ function userPage() {
             </div>
 
             <div className="main-column">
-                {renderMainComponent(selectedLink, playlistAnalysisData, isLoading, topTracks, topArtists)}
+                {renderMainComponent(selectedLink, playlistAnalysisData, isLoading, topTracks, topArtistsData)}
             </div>
 
         </div>
     );
 }
 
-function renderMainComponent(selectedLink, playlistAnalysisData, isLoading, topTracks, topArtists) {
+function renderMainComponent(selectedLink, playlistAnalysisData, isLoading, topTracks, topArtistsData) {
     switch (selectedLink) {
         case 'user-playlists':
             return <PlaylistsComponent playlistAnalysisData={playlistAnalysisData} isLoading={isLoading} />;
         case 'top-tracks':
             return <TopTracksComponent topTracks={topTracks}/>;
         case 'top-artists':
-            return <TopArtistsComponent topArtists={topArtists}/>;
-        case 'recommended':
-            return <RecommendedComponent />;
+            return <TopArtistsComponent topArtists={topArtistsData}/>;
+        // case 'recommended':
+        //     return <RecommendedComponent />;
         default:
             return <PlaylistsComponent playlistAnalysisData={playlistAnalysisData} isLoading={isLoading} />;
     }
