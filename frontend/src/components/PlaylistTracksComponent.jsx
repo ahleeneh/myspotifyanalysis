@@ -45,7 +45,7 @@ function PlaylistTracksComponent({ tracks, image, name, description, onReset }) 
                                     </div>
                                 </td>
                                 <td>{song.track.album.name}</td>
-                                <td>   
+                                <td>
                                     {`${Math.floor(song.track.duration_ms / 60000)}:${(song.track.duration_ms % 60000 / 1000 < 10 ? '0' : '')}${(song.track.duration_ms % 60000 / 1000).toFixed(0)}`}
                                 </td>
                                 <td>{format(new Date(song.added_at), 'MMM d, y')}</td>

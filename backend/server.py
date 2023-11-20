@@ -28,8 +28,10 @@ API_BASE_URL = os.environ.get('API_BASE_URL')
 FRONTEND_LOGIN_URL = 'http://localhost:1890'
 FRONTEND_REDIRECT_URL = 'http://localhost:1890/user'
 
-# Messages
+# Other constants
 NO_PLAYLISTS_FOUND_MSG = 'No playlists found for this year for the current user.'
+PLAYLIST_OFFSET = 0
+PLAYLIST_LIMIT = 15
 
 # Create Flask application
 app = Flask(__name__)
@@ -125,7 +127,8 @@ def user_playlists():
     including the total followers, average popularity, top genres and artists.
     '''
     headers = get_spotify_headers()
-    playlists = get_current_user_playlists(headers, 0, 15).get('items', [])
+    playlists = get_current_user_playlists(
+        headers, PLAYLIST_OFFSET, PLAYLIST_LIMIT).get('items', [])
 
     # Check if there are no playlists found
     if not playlists:
@@ -256,6 +259,7 @@ def top_items():
     # Send GET request to retrieve a user's top items
     top_items = get_users_top_items(headers, item_type, time_range, limit)
 
+    # Add audio feature analysis for top tracks
     if top_items and item_type == 'tracks':
         ids = ",".join([item['id'] for item in top_items.get('items', [])])
         audio_features = get_several_tracks_audio_features(
