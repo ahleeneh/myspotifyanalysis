@@ -28,6 +28,9 @@ API_BASE_URL = os.environ.get('API_BASE_URL')
 FRONTEND_LOGIN_URL = 'http://localhost:1890'
 FRONTEND_REDIRECT_URL = 'http://localhost:1890/user'
 
+# Messages
+NO_PLAYLISTS_FOUND_MSG = 'No playlists found for this year for the current user.'
+
 # Create Flask application
 app = Flask(__name__)
 
@@ -105,15 +108,8 @@ def callback():
             'client_secret': CLIENT_SECRET
         }
 
-        # Send POST request to exchange the authorization code for an access/refresh token
-        response = requests.post(TOKEN_URL, data=req_body)
-        token_info = response.json()
-
-        # Save the token information in the session
-        session['access_token'] = token_info['access_token']
-        session['refresh_token'] = token_info['refresh_token']
-        session['expires_at'] = datetime.now().timestamp() + \
-            token_info['expires_in']
+        token_info = exchange_token(req_body)
+        save_token_information(token_info)
 
         # Redirect the user to the frontend user page
         return redirect(FRONTEND_REDIRECT_URL)
@@ -124,84 +120,97 @@ def callback():
 # -----------------------------
 @app.route('/user-playlists')
 def user_playlists():
-    # Generate spotify headers to use for Spotify Web API
+    '''
+    Determine the playlists created by the user this year and an analysis
+    including the total followers, average popularity, top genres and artists.
+    '''
     headers = get_spotify_headers()
-
-    # Send GET request to retrieve up to 15 of user's playlists
     playlists = get_current_user_playlists(headers, 0, 15).get('items', [])
+
+    # Check if there are no playlists found
     if not playlists:
-        return 'No playlists found for this year for the current user.'
+        return NO_PLAYLISTS_FOUND_MSG
 
-    # Send GET request to retrieve user's id
     user_id = get_current_user_profile(headers)['id']
+    result_data = analyze_users_playlists(playlists, headers, user_id)
 
-    # Find the playlists created by the user this year
-    filtered_playlists, total_followers, avg_popularity, artist_counter = filter_and_analyze_playlists(playlists, headers, user_id)
-    if not filtered_playlists:
-        return 'No playlists found for this year for the current user.'
-    
-    avg_popularity = avg_popularity // len(filtered_playlists)
-    top_artists, top_genres = get_top_artists_genres_from_artists(artist_counter, headers)
-    result_data = {
-        'annual_user_playlists': filtered_playlists,
+    if result_data == NO_PLAYLISTS_FOUND_MSG:
+        return result_data
+    return jsonify(result_data)
+
+
+def analyze_users_playlists(playlists, headers, user_id):
+    '''
+    Find the playlists created by the current user this year and the
+    total followers, average popularity, top 5 genres, and top 5 artists.
+    '''
+    current_yr_playlists = []
+    total_followers = 0
+    avg_popularity = 0
+    artist_counter = Counter()
+
+    for playlist in playlists:
+        if playlist['owner']['id'] != user_id:
+            continue
+
+        # Retrieve a playlist's details
+        playlist_info = get_specific_playlist_details(headers, playlist)
+
+        if not is_playlist_created_this_year(playlist_info):
+            continue
+
+        # Analyze the playlist
+        playlist_popularity, playlist_followers, artist_counter = analyze_individual_playlist(
+            playlist_info, artist_counter)
+        avg_popularity += playlist_popularity
+        total_followers += playlist_followers
+        current_yr_playlists.append(playlist)
+
+    if not current_yr_playlists:
+        return NO_PLAYLISTS_FOUND_MSG
+
+    avg_popularity = avg_popularity // len(current_yr_playlists)
+    top_artists, top_genres = get_top_artists_genres_from_artists(
+        headers, artist_counter)
+
+    return {
+        'annual_user_playlists': current_yr_playlists,
         'total_followers': total_followers,
         'avg_popularity': avg_popularity,
         'top_genres': top_genres,
         'top_artists': top_artists
     }
 
-    return jsonify(result_data)
 
+def analyze_individual_playlist(playlist, artist_counter):
+    '''Determine a playlist's popularity, followers, and updates artist Counter.'''
+    popularity = 0
+    followers = int(playlist['followers']['total'])
+    tracks = playlist['tracks']['items']
 
-def filter_and_analyze_playlists(playlists, headers, user_id):
-    '''
-    Find the playlists created this year by the current year, and determine
-    the total number of followers, average popularity, and artist Counter.
-    '''
-    filtered_playlists = []
-    total_followers = 0
-    avg_popularity = 0
-    artist_counter = Counter()
+    for track in tracks:
+        popularity += int(track['track']['popularity'])
+        artist_id = track['track']['artists'][0]['id']
+        artist_counter.update({artist_id: 1})
 
-    for playlist in playlists:
-        # Skip the playlist analysis if not the current user's playlist
-        if playlist['owner']['id'] != user_id:
-            continue
+    popularity = popularity // len(tracks) if tracks else popularity
 
-        # Retrieve a playlist's details
-        playlist_info = get_playlist_info_with_fields(headers, playlist)
-
-        # Skip the playlist analysis if the playlist was not created this year
-        if not is_playlist_created_this_year(playlist_info):
-            continue
-
-        # Analyze the playlist
-        filtered_playlists.append(playlist)
-        playlist_popularity = 0
-        total_followers += int(playlist_info['followers']['total'])
-        playlist_tracks = playlist_info['tracks']['items']
-
-        for track in playlist_tracks:
-            playlist_popularity += int(track['track']['popularity'])
-            artist_id = track['track']['artists'][0]['id']
-            artist_counter.update({artist_id: 1})
-        
-        avg_popularity += playlist_popularity // len(playlist_tracks)
-    
-    return filtered_playlists, total_followers, avg_popularity, artist_counter    
+    return popularity, followers, artist_counter
 
 
 def is_playlist_created_this_year(playlist):
     '''Return a boolean value determining if the playlist was created this year.'''
-    sorted_tracks = sorted(playlist['tracks']['items'], key=lambda x: x['added_at'])
+    sorted_tracks = sorted(
+        playlist['tracks']['items'], key=lambda x: x['added_at'])
     first_track_added_year = int(sorted_tracks[0]['added_at'][:4])
     current_year = date.today().year
     return first_track_added_year == current_year
 
 
-def get_top_artists_genres_from_artists(artist_counter, headers):
+def get_top_artists_genres_from_artists(headers, artist_counter):
     '''Determine the top 5 artists and top 5 genres from an artist Counter.'''
-    artist_ids = ",".join([artist[0] for artist in artist_counter.most_common(5)])
+    artist_ids = ",".join([artist[0]
+                          for artist in artist_counter.most_common(5)])
     artist_info = get_several_artists(headers, artist_ids)
     top_artists = []
     genre_counter = Counter()
@@ -209,8 +218,8 @@ def get_top_artists_genres_from_artists(artist_counter, headers):
     for artist in artist_info['artists']:
         top_artists.append(artist['name'])
         genre_counter.update(artist['genres'])
-    top_genres = [genre[0] for genre in genre_counter.most_common(5)]
 
+    top_genres = [genre[0] for genre in genre_counter.most_common(5)]
     return top_artists, top_genres
 
 
@@ -247,7 +256,30 @@ def top_items():
     # Send GET request to retrieve a user's top items
     top_items = get_users_top_items(headers, item_type, time_range, limit)
 
+    if top_items and item_type == 'tracks':
+        ids = ",".join([item['id'] for item in top_items.get('items', [])])
+        audio_features = get_several_tracks_audio_features(
+            headers, ids).get('audio_features', [])
+        stats = calculate_average_statistics(audio_features)
+        top_items['stats'] = stats
+
     return jsonify(top_items)
+
+
+def calculate_average_statistics(audio_features):
+    num_tracks = len(audio_features)
+
+    keys = ['acousticness', 'danceability', 'energy',
+            'instrumentalness', 'speechiness', 'valence']
+    sum_features = {key: 0 for key in keys}
+
+    for audio in audio_features:
+        for key in keys:
+            sum_features[key] += float(audio[key])
+
+    average_features = {
+        key: int(round(sum_features[key] / num_tracks, 2) * 100) for key in keys}
+    return average_features
 
 
 # -----------------------------
@@ -303,7 +335,7 @@ def get_playlist(headers, playlist_id):
     return response.json()
 
 
-def get_playlist_info_with_fields(headers, playlist):
+def get_specific_playlist_details(headers, playlist):
     '''
     Retrieve a playlist with the following fields: followers.total,
     name, tracks.items(added_at, track, name, popularity, artists(id, name))
@@ -331,8 +363,14 @@ def get_several_artists(headers, artist_ids):
 
 def get_users_top_items(headers, item_type, time_range, limit=20):
     '''Retrieve the current user's top artists or tracks based on calculated affinity.'''
-    print(item_type, time_range, limit)
     url = f"{API_BASE_URL}me/top/{item_type}?time_range={time_range}&limit={limit}"
+    response = requests.get(url, headers=headers)
+    return response.json()
+
+
+def get_several_tracks_audio_features(headers, track_ids):
+    '''Retrieve the audio features for multiple tracks based on their IDs.'''
+    url = f"{API_BASE_URL}audio-features?ids={track_ids}"
     response = requests.get(url, headers=headers)
     return response.json()
 
@@ -357,6 +395,20 @@ def get_spotify_headers():
     return headers
 
 
+def exchange_token(req_body):
+    '''Exchange an authorization code or refresh token for a new access token.'''
+    response = requests.post(TOKEN_URL, data=req_body)
+    return response.json()
+
+
+def save_token_information(token_info):
+    '''Save the token information in the session.'''
+    session['access_token'] = token_info['access_token']
+    session['refresh_token'] = token_info['refresh_token']
+    session['expires_at'] = datetime.now().timestamp() + \
+        token_info['expires_in']
+
+
 def refresh_access_token():
     '''Exchange a refresh token, if valid, for a new access token.'''
     print('Refreshing token!')
@@ -369,14 +421,9 @@ def refresh_access_token():
             'client_secret': CLIENT_SECRET
         }
 
-        # Send POST request to exchange refresh token for access token
-        response = requests.post(TOKEN_URL, data=req_body)
-        new_token_info = response.json()
-
-        # Store the new access token and expiration information into the user's session
-        session['access_token'] = new_token_info['access_token']
-        session['expires_at'] = datetime.now().timestamp() + \
-            new_token_info['expires_in']
+        # Exchange refresh token for access token and store new information into user's session
+        new_token_info = exchange_token(req_body)
+        save_token_information(new_token_info)
     else:
         return redirect(FRONTEND_LOGIN_URL)
 

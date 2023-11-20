@@ -12,17 +12,16 @@ function useUserData() {
         topGenres: [],
         topArtists: [],
     });
-    const [topTracks, setTopTracks] = useState({
-        long_term: null,
-        medium_term: null,
-        short_term: null
-    });
+    const [topTracksData, setTopTracksData] = useState({
+        long_term: { tracks: null, stats: null },
+        medium_term: { tracks: null, stats: null },
+        short_term: { tracks: null, stats: null}
+    })
     const [topArtistsData, setTopArtistsData] = useState({
         long_term: null,
         medium_term: null,
         short_term: null
     });
-    const [artistRecommendations, setArtistRecommendations] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
 
@@ -93,10 +92,13 @@ function useUserData() {
                 withCredentials: true
             });
 
-            setTopTracks(prevState => ({
+            setTopTracksData(prevState => ({
                 ...prevState,
-                [timeRange]: response.data.items,
-            }));
+                [timeRange]: {
+                    tracks: response.data.items,
+                    stats: response.data.stats,
+                }
+            }))
         } catch (error) {
             console.error('Error:', error)
         }
@@ -117,7 +119,7 @@ function useUserData() {
     }, []);
 
 
-    return { playlistAnalysisData, displayName, isLoading, topTracks, topArtistsData };
+    return { playlistAnalysisData, displayName, isLoading, topTracksData, topArtistsData };
 }
 
 export default useUserData;

@@ -27,7 +27,7 @@ function SidebarLinksComponent({ onSelectLink, selectedLink }) {
     return (
         <>
             <div className="link-top">
-                <h2>your analysis</h2>
+                <h2>menu</h2>
                 <div className={`link-card ${selectedLink === 'user-playlists' ? 'active' : ''}`} onClick={() => onSelectLink('user-playlists')}>
                     <img src={flower} className="link-image" />
                     <div className="link-card-text">
@@ -40,7 +40,7 @@ function SidebarLinksComponent({ onSelectLink, selectedLink }) {
                     <img src={dawn} className="link-image" />
                     <div className="link-card-text">
                         <h3>top tracks</h3>
-                        <p>top artists: all-time, 6 months, 4 weeks</p>
+                        <p>long-term, 6 months, 4 weeks</p>
                     </div>
                 </div>
 
@@ -48,7 +48,7 @@ function SidebarLinksComponent({ onSelectLink, selectedLink }) {
                     <img src={sea} className="link-image" />
                     <div className="link-card-text">
                         <h3>top artists</h3>
-                        <p>top songs: all-time, 6 months, 4 weeks</p>
+                        <p>long-term, 6 months, 4 weeks</p>
                     </div>
                 </div>
 

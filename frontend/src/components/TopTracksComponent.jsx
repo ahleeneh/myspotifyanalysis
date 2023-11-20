@@ -1,7 +1,8 @@
-import axios from 'axios';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import TopTracksStatsComponent from './TopTracksStatsComponent';
+import TopTracksTableComponent from './TopTracksTableComponent';
 
-function TopTracksComponent({ topTracks }) {
+function TopTracksComponent({ topTracksData }) {
     const [selectedTimeRange, setSelectedTimeRange] = useState('long_term');
 
     const handleTimeRangeClick = (timeRange) => {
@@ -33,43 +34,12 @@ function TopTracksComponent({ topTracks }) {
                 </button>
             </div>
 
-            {topTracks[selectedTimeRange] ? (
-                <div className="playlist-table">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>title</th>
-                                <th>album</th>
-                                <th>time</th>
-                                <th>popularity</th>
-                            </tr>
-                        </thead>
+            {topTracksData[selectedTimeRange]?.stats ? (
+                <TopTracksStatsComponent stats={topTracksData[selectedTimeRange].stats} />
+            ) : null}
 
-                        <tbody>
-                            {topTracks[selectedTimeRange].map((song, index) => (
-                                <tr key={index} className="border-radius">
-                                    <td>{index + 1}</td>
-                                    <td>
-                                        <div className="title-container">
-                                            <img src={song.album.images[0].url} alt="album cover" className="playlist-album-cover" />
-                                            <div className="title-right">
-                                                <p>{song.name}</p>
-                                                <p className="grey-text">{song.artists[0].name}</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>{song.album.name}</td>
-                                    <td>
-                                        {`${Math.floor(song.duration_ms / 60000)}:${(song.duration_ms % 60000 / 1000 < 10 ? '0' : '')}${(song.duration_ms % 60000 / 1000).toFixed(0)}`}
-                                    </td>
-                                    <td>{song.popularity}%</td>
-                                </tr>
-                            ))}
-                        </tbody>
-
-                    </table>
-                </div>
+            {topTracksData[selectedTimeRange]?.tracks ? (
+                <TopTracksTableComponent tracks={topTracksData[selectedTimeRange].tracks} />
             ) : (
                 <div className="playlist-table">
                 </div>

@@ -369,3 +369,37 @@ main {
     background-color: var(--color-card-hover);
     transition: background-color 0.25s;
 }
+
+.stats-card-container {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    background-color: var(--color-card);
+    border-radius: var(--border-radius-card);
+}
+
+.stats-card {
+    padding: 15px;
+    min-width: 5rem;
+    height: 5.75rem;
+    box-sizing: border-box;
+    display: flex;
+    align-items: left;
+    flex-direction: column;
+    text-align: center;
+    flex: 1;
+}
+
+.stats-card h3 {
+    font-size: 0.9rem;
+}
+
+.stats-card p {
+    font-size: 2rem;
+    transition: color 0.25s;
+    color: var(--color-light-grey);
+}
+

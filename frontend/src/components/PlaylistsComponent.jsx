@@ -96,7 +96,7 @@ function PlaylistsComponent({ playlistAnalysisData, isLoading }) {
                     </div>
 
                     <div className="playlists-analysis-container">
-                        <h2>playlist '23 wrapped</h2>
+                        <h2>playlist '23 analysis</h2>
 
                         <div className="cards-container">
                             <div className="card analysis-card">

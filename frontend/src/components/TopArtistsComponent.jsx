@@ -1,5 +1,4 @@
-import axios from 'axios';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 function TopArtistsComponent({ topArtists }) {
     const [selectedTimeRange, setSelectedTimeRange] = useState('long_term');
@@ -39,8 +38,8 @@ function TopArtistsComponent({ topArtists }) {
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>name</th>
-                                <th>genres</th>
+                                <th>artist</th>
+                                <th>associated genres</th>
                                 <th>popularity</th>
                             </tr>
                         </thead>
