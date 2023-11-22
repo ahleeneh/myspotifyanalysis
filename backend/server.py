@@ -25,8 +25,10 @@ TOKEN_URL = os.environ.get('TOKEN_URL')
 API_BASE_URL = os.environ.get('API_BASE_URL')
 
 # Redirect Front-End URLS
-FRONTEND_LOGIN_URL = 'http://localhost:1890'
-FRONTEND_REDIRECT_URL = 'http://localhost:1890/user'
+FRONTEND_LOGIN_URL = os.environ.get('FRONTEND_LOGIN_URL')
+FRONTEND_REDIRECT_URL = os.environ.get('FRONTEND_REDIRECT')
+# FRONTEND_LOGIN_URL = 'http://localhost:1890'
+# FRONTEND_REDIRECT_URL = 'http://localhost:1890/user'
 
 # Other constants
 NO_PLAYLISTS_FOUND_MSG = 'No playlists found for this year for the current user.'
@@ -448,4 +450,5 @@ def clear_session():
 # Start Flask Application
 # -----------------------------
 if __name__ == '__main__':
-    app.run(port=6393, debug=True)
+    app.run()
+    # app.run(port=6393, debug=True)
