@@ -1,7 +1,6 @@
 # Implement's Spotify's Web API: https://developer.spotify.com/documentation/web-api
 # Create Flask application: https://code.visualstudio.com/docs/python/tutorial-flask
 
-
 import os
 import requests
 import secrets
@@ -23,14 +22,8 @@ REDIRECT_URI = os.environ.get('REDIRECT_URI')
 AUTH_URL = os.environ.get('AUTH_URL')
 TOKEN_URL = os.environ.get('TOKEN_URL')
 API_BASE_URL = os.environ.get('API_BASE_URL')
-
-# Redirect Front-End URLS
 FRONTEND_LOGIN_URL = os.environ.get('FRONTEND_LOGIN_URL')
-FRONTEND_REDIRECT_URL = os.environ.get('FRONTEND_REDIRECT')
-# FRONTEND_LOGIN_URL = 'http://localhost:1890'
-# FRONTEND_REDIRECT_URL = 'http://localhost:1890/user'
-
-# Other constants
+FRONTEND_REDIRECT_URL = os.environ.get('FRONTEND_REDIRECT_URL')
 NO_PLAYLISTS_FOUND_MSG = 'No playlists found for this year for the current user.'
 PLAYLIST_OFFSET = 0
 PLAYLIST_LIMIT = 15
@@ -450,5 +443,5 @@ def clear_session():
 # Start Flask Application
 # -----------------------------
 if __name__ == '__main__':
-    app.run()
+    app.run(host="0.0.0.0", port=5000)
     # app.run(port=6393, debug=True)
