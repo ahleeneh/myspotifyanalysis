@@ -39,7 +39,6 @@ app.secret_key = SECRET_KEY
 app.config['SESSION_COOKIE_NAME'] = 'MY SPOTIFY ANALYSIS COOKIE COOKIE!'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 
-
 # -----------------------------
 # Home Route
 # -----------------------------
@@ -94,7 +93,7 @@ def callback():
         stored_session_state = session.get('state')
 
         if received_state != stored_session_state:
-            return 'Invalid state parameters! Possible CSRF attack!'
+            return jsonify({'Error': 'Invalid state parameters! Possible CSRF attack!'})
 
         # Create request body parameters to request access token
         req_body = {
@@ -110,6 +109,8 @@ def callback():
 
         # Redirect the user to the frontend user page
         return redirect(FRONTEND_REDIRECT_URL)
+    
+    return jsonify({'Error': 'No code in request.args!'})
 
 
 # -----------------------------
@@ -198,11 +199,10 @@ def analyze_individual_playlist(playlist, artist_counter):
 
 def is_playlist_created_this_year(playlist):
     '''Return a boolean value determining if the playlist was created this year.'''
-    sorted_tracks = sorted(
-        playlist['tracks']['items'], key=lambda x: x['added_at'])
-    first_track_added_year = int(sorted_tracks[0]['added_at'][:4])
+    earliest_addition_time = min(track['added_at'] for track in playlist['tracks']['items'])
+    earliest_year_added = int(earliest_addition_time[:4])
     current_year = date.today().year
-    return first_track_added_year == current_year
+    return earliest_year_added == current_year
 
 
 def get_top_artists_genres_from_artists(headers, artist_counter):

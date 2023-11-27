@@ -54,12 +54,6 @@ function LoginPage() {
                         <h2>top artists</h2>
                         <p>long-term, 6 months, 4 weeks</p>
                     </div>
-
-                    {/* <div className="feature-card">
-                        <img src={cliff} className="card-image" />
-                        <h2>recommended</h2>
-                        <p>coming soon!</p>
-                    </div> */}
                 </div>
             </div>
 
