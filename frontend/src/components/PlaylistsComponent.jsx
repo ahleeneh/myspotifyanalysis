@@ -6,6 +6,7 @@ import topgenres from '../images/topgenres.png';
 import totalfollowers from '../images/totalfollowers.png';
 import averagepopularity from '../images/averagepopularity.png';
 
+import PlaylistLoadingComponent from './PlaylistLoadingComponent';
 import PlaylistTracksComponent from './PlaylistTracksComponent';
 
 function PlaylistsComponent({ playlistAnalysisData, isLoading }) {
@@ -54,10 +55,9 @@ function PlaylistsComponent({ playlistAnalysisData, isLoading }) {
 
     if (isLoading) return (
         <div className="main-content-container">
-            <h1>playlists '23</h1>
-
-            <p>finding and analyzing all your playlists created this year...</p>
+            <PlaylistLoadingComponent />
         </div>
+
     )
 
     if (annualUserPlaylists && annualUserPlaylists.length > 0) {
@@ -77,6 +77,7 @@ function PlaylistsComponent({ playlistAnalysisData, isLoading }) {
             return (
                 <div className="main-content-container">
                     <h1>playlists '23</h1>
+
                     <div className="cards-container">
                         {annualUserPlaylists.map((playlist) => (
                             <div
